@@ -1,6 +1,3 @@
-Simulation tool of the Ashwin Bowles Model
-using GPGPU Coumputing with the goal
-to simulate system with arround 10^6 particles
-in order to compare the analytical solution of
-Edwards statistic of this model with simulation
-in the thermodynamic limes.
+﻿Tool tu simulate the Ashwin Bowles Model using GPGPU Computing with the goal
+to compare a system with arround 10^6 particles with the analytical solution of
+the Edwards ensemble of this model with simulation in the thermodynamic limit.
