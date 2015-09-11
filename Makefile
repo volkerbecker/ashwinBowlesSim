@@ -1,9 +1,12 @@
 CLFLAGS = -DCL_USE_DEPRECATED_OPENCL_2_0_APIS -D__CL_ENABLE_EXCEPTIONS -DCL_ENABLE_EXCEPTIONS -std=c++11
 
-INCLUDE =	-I${AMDAPPSDKROOT}/include -I${HOME}/workspace/openGLvisualizer 
+INCLUDE =-I${HOME}/workspace/openGLvisualizer 
 
 OBJS =	ashwinBowles.o ParticleSystem.o
 
+#For amazing-sax
+#LIBS =	-lOpenCL -L${AMDAPPSDKROOT}/lib/x86_64 -L${HOME}/workspace/openGLvisualizer -lminglvisualizer -lsfml-system -lsfml-window -lGLEW -lSOIL -lGL -lsfml-graphics -lX11 -pthread
+#For Meitner
 LIBS =	-lOpenCL -L${AMDAPPSDKROOT}/lib/x86_64 -L${HOME}/workspace/openGLvisualizer -lminglvisualizer -lsfml-system -lsfml-window -lGLEW -lSOIL -lGL -lsfml-graphics -lX11 -pthread
 
 TARGET = ashwinBowles
