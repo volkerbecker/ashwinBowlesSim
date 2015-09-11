@@ -16,7 +16,6 @@ ashwinBowles
 .cproject
 .project
 .settings
-#ignore makefile because it is platform dependend
-Makefile
+
 
 
