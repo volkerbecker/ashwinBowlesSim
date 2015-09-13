@@ -18,6 +18,7 @@ class ParticleSystem {
 public:
 	ParticleSystem(
 			const cl::Context & Context ,  ///< openCL context to connect particle data to gpu
+			const cl::CommandQueue & queue, ///< openCL Command queue
 			const int & particleNumber, ///< Number of particles
 			const float & radius=0.5, ///< radius of the particles
 			const float & mass=1, ///< particles mass
@@ -54,18 +55,51 @@ public:
 	/// \return reference to the velocity Buffer
 	cl::Buffer & getAccelerationBuffer() {return accelerationBuffer;}
 
+	/// \return reference to the Position offsets
+	vector<cl_int> & getOffset() {return offset;}
+	const vector<cl_int> & getOffset() const {return offset;}
+
+	/// \return reference to the positions
+	vector<cl_float2> & getPositions() {return position;}
+	const vector<cl_float2> & getPositions() const {return position;}
+
+	/// \return reference to the velocities
+	vector<cl_float2> & getVelocities() {return velocity;}
+	const vector<cl_float2> & getVelocities() const {return velocity;}
+
+	/// \return reference to the accelerations
+	vector<cl_float2> & getAccelerations() {return acceleration;}
+	const vector<cl_float2> & getAccelerations() const  {return acceleration;}
+
+	///< get the position of the i'th particle
+	cl_double2 getPosition(
+			int number ///< return the position of the i'th particle
+			) {
+		cl_double2 tmp;
+		tmp.s[0]=(double)offset[number]+position[number].s[0];
+		tmp.s[1]=(double)position[number].s[1];
+		return tmp;
+	}
+
+	///< copy particle data from gpu tu cpu memory
+	void getParticleDataFromDevice();
+
+
 
 protected:
 	unsigned int _size=0; ///< number of particles
 	float _radius;
 	float _mass;
-	vector<int> offset; ///< offset for the particle x-positions
+	vector<cl_int> offset; ///< offset for the particle x-positions
 	vector<cl_float2> position; ///< particles' x position relative to the offset
 	vector<cl_float2> velocity; ///< particles velocities
 	vector<cl_float2> acceleration; ///<particles accelerations
 
+	vector<cl_float2> offsetfreepositions; //< positions for visualization;
+
 
 	const cl::Context &context; ///< opencl context, must be defined elsewhere
+	const cl::CommandQueue &queue; ///< opencl Command queue, must be defined elsewhere
 
 	cl::Buffer offsetBuffer; ///< buffer connected with the positions offset
 	cl::Buffer positionBuffer;       ///< buffer connected with the positions

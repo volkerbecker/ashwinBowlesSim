@@ -24,7 +24,10 @@ int main(void) {
 	cl::Context context(devices);
 	// create a context
 
-	ParticleSystem particles(context,20);
+	// create a command queue
+	cl::CommandQueue queue = cl::CommandQueue(context, devices[0]);
+
+	ParticleSystem particles(context,queue,1000);
 
 
 
