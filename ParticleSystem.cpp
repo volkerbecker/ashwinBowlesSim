@@ -26,6 +26,9 @@ ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL contex
 	// initialize particles
 	createParticleString(initialdistance);
 
+	// initialize offsert free buffer
+	offsetfreepositions.resize(size());
+
 	// create opencl Buffers
 	offsetBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(cl_int) * offset.size(),offset.data());
@@ -51,7 +54,7 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 	offset.resize(size());
 
 	int tmpOffset=0;
-	float tmpPositionx=0;
+	float tmpPositionx=0+radius();
 	float deltaX=2*radius()+initialDistance;
 	for(uint i=0;i<size();++i) {
 		offset[i]=tmpOffset;
@@ -76,4 +79,28 @@ void ParticleSystem::getParticleDataFromDevice() {
 	queue.enqueueReadBuffer(accelerationBuffer, CL_TRUE, 0,
 			sizeof(cl_float2) * acceleration.size(), acceleration.data());
 }
+
+void ParticleSystem::updateOffsetfreePositions() {
+	getParticleDataFromDevice();
+	for(int i=0;i<size();++i) {
+		cl_double2 tmp=getPosition(i);
+		offsetfreepositions[i].s[0]=(float)tmp.s[0];
+		offsetfreepositions[i].s[1]=(float)tmp.s[1];
+	}
+}
+
+ostream& operator <<(ostream& os, ParticleSystem & ps) {
+	ps.getParticleDataFromDevice();
+	for (int i = 0; i < ps.size(); i++) {
+		os << (double) ps.getPosition(i).s[0] << "\t"
+				<< (double) ps.getPosition(i).s[1] << "\t"
+				<< ps.velocity[i].s[0] << "\t" << ps.velocity[i].s[1] << "\t"
+				<< ps.acceleration[i].s[0] << "\t" << ps.acceleration[i].s[1]
+				<< "\n";
+	}
+	return os;
+}
+
+
+
 

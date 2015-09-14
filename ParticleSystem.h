@@ -9,6 +9,7 @@
 #define PARTICLESYSTEM_H_
 #include <vector>
 #include <CL/cl.hpp>
+#include <iostream>
 
 using namespace std;
 
@@ -81,8 +82,20 @@ public:
 		return tmp;
 	}
 
+
 	///< copy particle data from gpu tu cpu memory
 	void getParticleDataFromDevice();
+
+	// update the offsetfree position buffer for visualization
+	void updateOffsetfreePositions();
+
+	/// get a read only pointer to the offset free positions
+	const float* getOffsetFreePositionPointer() {
+		return (float*)offsetfreepositions.data();
+	}
+
+	///ostream operator
+	friend ostream& operator << (ostream& os, ParticleSystem & ps);
 
 
 
