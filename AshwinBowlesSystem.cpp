@@ -37,7 +37,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 	particles = new ParticleSystem(context,queue,parameters.numberOfParticles,
 			parameters.radius,parameters.mass,initialdistance);
 	walls = new Walls(context, queue, initialHight * 0.5f, -initialHight * 0.5f,
-			0, initialLength, parameters.wallstampforce);
+			0, initialLength, parameters.wallstampforce,parameters.mass);
 }
 
 AshwinBowlesSystem::~AshwinBowlesSystem() {
