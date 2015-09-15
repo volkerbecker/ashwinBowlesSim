@@ -1,3 +1,4 @@
-﻿Tool tu simulate the Ashwin Bowles Model using GPGPU Computing with the goal
-to compare a system with arround 10^6 particles with the analytical solution of
-the Edwards ensemble of this model with simulation in the thermodynamic limit.
+﻿Code for the simulation of a system described by the the Ashwin Bowles Model 
+using GPGPU Computing with the goal to compare very big systems 
+with the analytical solution of the Edwards Entropy of this model with simulation 
+and explore the thermodynamic limit.
