@@ -16,7 +16,13 @@ typedef struct Parameters {
     cl_int numberOfParticles; ///< number of particles
     cl_float mass; ///<particles mass
     cl_float radius; ///<particles radius
+    cl_float diameter; ///< particles dameter = 2 * radius
     cl_float wallstampforce; ///< the stamp force for jamming
+    cl_float timestep;
+    cl_float timestepSq;
+    cl_float springConstant;
+    cl_float damping;
+    cl_float inverseMass;
 } Parameters;
 
 #endif

@@ -37,6 +37,9 @@ protected:
 	/// Kernel which will calculate the wall forces and then update the velocities
 	cl::Kernel verletStep2Kernel;
 
+	/// Kernel which will update the positon offsets
+	cl::Kernel updateOffsets;
+
 
 	ParticleSystem *particles;
 	Walls *walls;
