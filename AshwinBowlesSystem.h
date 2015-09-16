@@ -40,6 +40,10 @@ protected:
 
 	ParticleSystem *particles;
 	Walls *walls;
+
+private:
+	void initializeOpenCL();
+	cl::Program loadCLSource(const char *, const cl::Context &);
 };
 
 

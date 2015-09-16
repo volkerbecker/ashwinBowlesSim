@@ -4,7 +4,12 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
+#ifndef __OPENCL_VERSION__
 #include <CL/cl.hpp>
+#else
+	typedef int cl_int;
+	typedef float cl_float;
+#endif
 
 ///This structure contains all global, constant variables
 typedef struct Parameters {
