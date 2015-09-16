@@ -20,7 +20,7 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=20;
+	parameters.numberOfParticles=256*100;
 	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.wallstampforce=1;
@@ -28,7 +28,11 @@ int main(void) {
 	puts("Hello World!!!");
 
 
-	AshwinBowlesSystem simulation(parameters,0.1,30,5);
+	AshwinBowlesSystem simulation(parameters,0.1,256.2*100,5);
+
+	for(int i=0;i<10000000;++i) {
+		simulation.enqueueTimeStep();
+	}
 
 
 	return EXIT_SUCCESS;

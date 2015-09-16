@@ -22,6 +22,9 @@ public:
 			const float &initialHight); ///< height of the box
 	~AshwinBowlesSystem();
 
+	/// adds N timesteps to the openCL queue
+	void enqueueTimeStep();
+
 protected:
 	std::vector<cl::Platform> plattforms;
 	std::vector<cl::Device> devices;
@@ -37,16 +40,21 @@ protected:
 	/// Kernel which will calculate the wall forces and then update the velocities
 	cl::Kernel verletStep2Kernel;
 
-	/// Kernel which will update the positon offsets
-	cl::Kernel updateOffsets;
+	/// Kernel which will update the position offsets
+	cl::Kernel updateOffsetsKernel;
+
+	cl::Buffer parameterBuffer;
 
 
 	ParticleSystem *particles;
 	Walls *walls;
 
+	Parameters parameter;
+
 private:
 	void initializeOpenCL();
 	cl::Program loadCLSource(const char *, const cl::Context &);
+
 };
 
 

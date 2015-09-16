@@ -51,11 +51,16 @@ __kernel void calculateAccelaration(__global int *posOffset,__global float2 *pos
 	}
 }
 
-__kernel void verletStep2(__global int *posOffset,__global float2 *position, __global float2 *velocity,
-		__global float2 *acceleration,__global float2 *oldAcceleration,
-		__global float *verticalWalls, __global float *horizontalWalls,
+__kernel void verletStep2(
+		__global int *posOffset,
+		__global float2 *position,
+		__global float2 *velocity,
+		__global float2 *acceleration,
+		__global float2 *oldAcceleration,
 		__global int *wallOffsets,
-		__constant struct Parameters* paras,const int offset) {
+		__global float *verticalWalls,
+		__global float *horizontalWalls,
+		__constant struct Parameters* paras) {
 	int id=get_global_id(0);
 	//calculate wall forces
 

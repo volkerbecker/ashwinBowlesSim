@@ -56,6 +56,9 @@ public:
 	/// \return reference to the velocity Buffer
 	cl::Buffer & getAccelerationBuffer() {return accelerationBuffer;}
 
+	/// \return refrence to oldAccelaration buffer
+	cl::Buffer & getOldAccelerationBuffer() {return oldAccelerationBuffer;}
+
 	/// \return reference to the Position offsets
 	vector<cl_int> & getOffset() {return offset;}
 	const vector<cl_int> & getOffset() const {return offset;}
@@ -118,6 +121,7 @@ protected:
 	cl::Buffer positionBuffer;       ///< buffer connected with the positions
 	cl::Buffer velocityBuffer;	     ///< buffer connected with the velocities
 	cl::Buffer accelerationBuffer;   ///< buffer connected with the accelerations
+	cl::Buffer oldAccelerationBuffer;   ///< buffer connected with the oldaccelerations
 
 	void createParticleString( ///< create a string of particles allog the y axis
 			const float & initialDistance ///< distance between particles
