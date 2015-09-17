@@ -42,8 +42,6 @@ Walls::Walls(
 		infinityVerticalWallAcceleration[i]=0;
 	}
 
-
-	infiniteVerticalWallsPositions[0]=tmpposition;
 	try {
 		offsetForVerticalWallsBuffer = cl::Buffer(context,
 				CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
@@ -78,20 +76,21 @@ void Walls::getDataFromDevice(){
 	try {
 		queue.enqueueReadBuffer(offsetForVerticalWallsBuffer, CL_TRUE, 0,
 				sizeof(offsetForVerticalWalls), offsetForVerticalWalls);
-		queue.enqueueReadBuffer(positionVerticalWallsBuffer, CL_TRUE, 0,
-				sizeof(infiniteVerticalWallsPositions),
-				infiniteVerticalWallsPositions);
-		queue.enqueueReadBuffer(positionHorizontalWallBuffer, CL_TRUE, 0,
-				sizeof(infiniteHorizontalWallPositions),
-				infiniteHorizontalWallPositions);
-		queue.enqueueReadBuffer(verticalWallVelocityBuffer, CL_TRUE, 0,
-				sizeof(infiniteVerticalWallVelocity),
-				infiniteVerticalWallVelocity);
-		queue.enqueueReadBuffer(verticalWallAccelerationBuffer, CL_TRUE, 0,
-				sizeof(infinityVerticalWallAcceleration),
-				infinityVerticalWallAcceleration);
-	} catch (cl::Error &error) {
-		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
+//		queue.enqueueReadBuffer(positionVerticalWallsBuffer, CL_TRUE, 0,
+//				sizeof(infiniteVerticalWallsPositions),
+//				infiniteVerticalWallsPositions);
+//		queue.enqueueReadBuffer(positionHorizontalWallBuffer, CL_TRUE, 0,
+//				sizeof(infiniteHorizontalWallPositions),
+//				infiniteHorizontalWallPositions);
+//		queue.enqueueReadBuffer(verticalWallVelocityBuffer, CL_TRUE, 0,
+//				sizeof(infiniteVerticalWallVelocity),
+//				infiniteVerticalWallVelocity);
+//		queue.enqueueReadBuffer(verticalWallAccelerationBuffer, CL_TRUE, 0,
+//				sizeof(infinityVerticalWallAcceleration),
+//				infinityVerticalWallAcceleration);
+	} catch(cl::Error &error) {
+		std::cerr <<" error:" << error.what() << "(" << error.err() << ")" << std::endl;
+		std::cout << sizeof(offsetForVerticalWallsBuffer) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 

@@ -23,8 +23,8 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 	particles = new ParticleSystem(context, queue, parameters.numberOfParticles,
 			parameters.radius, parameters.mass, initialdistance);
 	//initialize walls
-	walls = new Walls(context, queue, initialHight * 0.5f, -initialHight * 0.5f,
-			0, initialLength, parameters.wallstampforce, parameters.mass);
+//	walls = new Walls(context, queue, initialHight * 0.5f, -initialHight * 0.5f,
+//			0, initialLength, parameters.wallstampforce, parameters.mass);
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
 
@@ -89,10 +89,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 		verletStep2Kernel.setArg(2,particles->getVelocityBuffer());
 		verletStep2Kernel.setArg(3,particles->getAccelerationBuffer());
 		verletStep2Kernel.setArg(4,particles->getOldAccelerationBuffer());
-		verletStep2Kernel.setArg(5,walls->getOffsetBuffer());
-		verletStep2Kernel.setArg(6,walls->getVerticalWallPositionBuffer());
-		verletStep2Kernel.setArg(7,walls->getHorizontalWallPositionBuffer());
-		verletStep2Kernel.setArg(8,parameterBuffer);
+		verletStep2Kernel.setArg(5,parameterBuffer);
 
 		updateOffsetsKernel.setArg(0,particles->getOffsetBuffer());
 		updateOffsetsKernel.setArg(1,particles->getPositionBuffer());
@@ -104,7 +101,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 
 AshwinBowlesSystem::~AshwinBowlesSystem() {
 	delete particles;
-	delete walls;
+	//delete walls;
 }
 
 void AshwinBowlesSystem::initializeOpenCL() {
@@ -144,7 +141,7 @@ void AshwinBowlesSystem::initializeOpenCL() {
 void AshwinBowlesSystem::enqueueTimeStep() {
 	try{
 		cl::NDRange globalp(parameter.numberOfParticles);
-		cl::NDRange localp(256); //todo optmiale wgsize finden
+		cl::NDRange localp=cl::NullRange; //todo optmiale wgsize finden
 		cl::NDRange globalAcc((int)parameter.numberOfParticles/2);
 		queue.enqueueNDRangeKernel(verletStep1Kernel,cl::NullRange,globalp,localp);
 		queue.enqueueNDRangeKernel(calculateAccelarationKernel1,cl::NullRange,globalAcc,localp);

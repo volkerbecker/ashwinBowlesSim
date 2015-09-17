@@ -23,6 +23,12 @@ typedef struct Parameters {
     cl_float springConstant;
     cl_float damping;
     cl_float inverseMass;
+    cl_int 	leftWallofset;
+    cl_float leftWall;
+    cl_int rightWallOffset;
+    cl_float rightWall;
+    cl_float upperWall;
+    cl_float lowerWall;
 } Parameters;
 
 #endif

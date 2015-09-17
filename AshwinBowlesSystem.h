@@ -25,6 +25,23 @@ public:
 	/// adds N timesteps to the openCL queue
 	void enqueueTimeStep();
 
+	/// returns a pointer to the OffsetFreePostions
+	/// necessary for visualization
+	const float* getPrtToOffsetFreePositions() {
+		return particles->getOffsetFreePositionPointer();
+	}
+
+	///uodate the host meory
+	void upDateHostMemory() {
+		particles->getParticleDataFromDevice();
+		walls->getDataFromDevice();
+	}
+
+	/// update the offset free postion data
+	void updateOffsetFreeData() {
+		particles->updateOffsetfreePositions();
+	}
+
 protected:
 	std::vector<cl::Platform> plattforms;
 	std::vector<cl::Device> devices;

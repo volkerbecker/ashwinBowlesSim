@@ -39,7 +39,7 @@ ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL contex
 	accelerationBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(cl_float2) * acceleration.size(),acceleration.data());
 	oldAccelerationBuffer =cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(cl_float2)*size());
-	queue.enqueueFillBuffer(oldAccelerationBuffer,(cl_float2){0,0},0,sizeof(cl_float2)*size());
+	//queue.enqueueFillBuffer(oldAccelerationBuffer,(cl_float2){0,0},0,sizeof(cl_float2));
 }
 
 
@@ -69,6 +69,8 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 		tmpOffset+=trunc(tmpPositionx);
 		tmpPositionx-=trunc(tmpPositionx);
 	}
+	velocity[0].s[0]=2;
+	velocity[0].s[1]=1;
 }
 
 void ParticleSystem::getParticleDataFromDevice() {
