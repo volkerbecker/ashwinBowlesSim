@@ -29,22 +29,28 @@ __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
 	velocity[id]+=acceleration[id]*paras->timestep;
 	oldAcceleration[id]=acceleration[id];
-	if(id==0 || id == paras->numberOfParticles-1) {
-		acceleration[id] = id==0 ? paras->stampAcceleration : - paras->stampAcceleration; //todo test whether it is faster by doing it on host side via copybuffer and fillbuffer
-	} else
-		acceleration[id]=0;
+	acceleration[id]=0;
+	//acceleration[id] = id==0 ? paras->stampAcceleration : 0; //todo test whether it is faster by doing it on host side via copybuffer and fillbuffer
 }
 
 __kernel void calculateAccelaration(__global int *posOffset,__global float2 *position, __global float2 *velocity,
 		__global float2 *acceleration,__constant struct Parameters* paras,const int start) {
 	int id=2*get_global_id(0)+start;
+	int gid=get_global_id(0);
 	if( (id+1) < paras->numberOfParticles) {
-		float2 distance=position[id+1]-position[id];
-		distance.x+=(posOffset[id+1]-posOffset[id]); ///evt lokalen speicher nutzen
+		__global int2 *posoff = (__global void*)(posOffset+start);
+		__global float4 *pos = (__global void*)(position+start);
+		float2 pos1= (float2)(pos[gid].x,pos[gid].y);
+		float2 pos2= (float2)(pos[gid].z,pos[gid].w);
+		float2 distance=pos2-pos1;
+		distance.x+=(posoff[gid].y-posoff[gid].x); ///evt lokalen speicher nutzen
 		float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
 		if(overlap>0) {
+			__global float4 *vel = (__global void*)(velocity+start);
+			float2 vel1=(float2)(vel[gid].x,vel[gid].y);
+			float2 vel2=(float2)(vel[gid].z,vel[gid].w);
 			distance=fast_normalize(distance); // calculate the normal vector
-			float force=-fmax(overlap*paras->springConstant+dot(velocity[id+1]+velocity[id],distance)*paras->damping,0);
+			float force=-fmax(overlap*paras->springConstant+dot(vel1-vel2,distance)*paras->damping,0);
 			float2 acc = (force) * paras->inverseMass * distance;
 //			if (id == 0)
 //				printf(
@@ -119,4 +125,43 @@ __kernel void updateOffset(__global int *posOffsets,__global float2 *positions) 
 	int truncPos=(int) positions[id].x;
 	posOffsets[id]+=truncPos;
 	positions[id].x-=truncPos;
+}
+
+/// This Kernel calulates the accelarations in one step, but to the price of doubling the
+/// number of force calcluations
+__kernel void calculateAccelarationOnestep(__global int *posOffset,__global float2 *position, __global float2 *velocity,
+		__global float2 *acceleration,__constant struct Parameters* paras,const int start) {
+	int id=get_global_id(0);
+	if( (id+1) < paras->numberOfParticles) {
+		float2 distance=position[id+1]-position[id];
+		distance.x+=(posOffset[id+1]-posOffset[id]); ///evt lokalen speicher nutzen
+		float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
+		if(overlap>0) {
+			distance=fast_normalize(distance); // calculate the normal vector
+			float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
+			float2 acc = (force) * paras->inverseMass * distance;
+//			if (id == 0)
+//				printf(
+//						"Force %f, Damping %f, Distance %f,%f overlapp: %f diameter %f\n",
+//						force, paras->damping, distance.x, distance.y, overlap,paras->diameter);
+			acceleration[id] += acc;
+			//acceleration[id+1]-=acc;
+		}
+	}
+	if( (id) >0 ) {
+			float2 distance=position[id-1]-position[id];
+			distance.x+=(posOffset[id-1]-posOffset[id]); ///evt lokalen speicher nutzen
+			float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
+			if(overlap>0) {
+				distance=fast_normalize(distance); // calculate the normal vector
+				float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
+				float2 acc = (force) * paras->inverseMass * distance;
+	//			if (id == 0)
+	//				printf(
+	//						"Force %f, Damping %f, Distance %f,%f overlapp: %f diameter %f\n",
+	//						force, paras->damping, distance.x, distance.y, overlap,paras->diameter);
+				acceleration[id] += acc;
+				//acceleration[id+1]-=acc;
+			}
+		}
 }
