@@ -53,7 +53,7 @@ int main(void) {
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			120,5000,0,-60,10);
+			120,120,500,-60,10);
 	visualizer.updateimage();
 
 
