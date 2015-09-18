@@ -62,15 +62,14 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 		offset[i]=tmpOffset;
 		position[i].s[0]=tmpPositionx;
 		position[i].s[1]=0;  // y_i=0
-		velocity[i].s[0]=velocity[i].s[1]=0; // v=0
+		velocity[i].s[0]=drand48()*2-1;
+		velocity[i].s[1]=drand48()*2-1;
 		acceleration[i].s[0]=acceleration[i].s[1]=0; //a=0
 
 		tmpPositionx+=deltaX;
 		tmpOffset+=trunc(tmpPositionx);
 		tmpPositionx-=trunc(tmpPositionx);
 	}
-	velocity[0].s[0]=2;
-	velocity[0].s[1]=1;
 }
 
 void ParticleSystem::getParticleDataFromDevice() {

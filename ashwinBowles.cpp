@@ -21,28 +21,29 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=50;
-	parameters.mass=1;
+	parameters.numberOfParticles=4000;
+	parameters.mass=10;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
 	parameters.wallstampforce=1;
 	parameters.timestep=0.001;
 	parameters.timestepSq=parameters.timestep*parameters.timestep;
 	parameters.springConstant=1000;
-	parameters.damping=0;
+	parameters.damping=2;
 	parameters.inverseMass=1/parameters.mass;
 	parameters.leftWall=0;
 	parameters.rightWall=0;
 	parameters.upperWall=0.75;
 	parameters.lowerWall=-0.75;
 	parameters.leftWallofset=0;
-	parameters.rightWallOffset=60;
+	parameters.rightWallOffset=10000*0.001+10000+1;
+	parameters.stampAcceleration=5*parameters.inverseMass;
 
 	puts("Hello World!!!");
 
 
 	Visualizer visualizer(800,800);
-	AshwinBowlesSystem simulation(parameters,0.1,60,1.5);
+	AshwinBowlesSystem simulation(parameters,0.001,150,1.5);
 	//simulation.upDateHostMemory();
 
 	simulation.updateOffsetFreeData();
@@ -52,16 +53,17 @@ int main(void) {
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			65,65,0,-30,20);
+			120,5000,0,-60,10);
 	visualizer.updateimage();
 
 
-	for(int i=0;i<100000;++i) {
+	for(int i=0;i<5000000;++i) {
 		simulation.enqueueTimeStep();
-		if(i%100==0) {
+		if(i%1000==0) {
+			simulation.enqueOffestupdate();
 			simulation.updateOffsetFreeData();
 			visualizer.updateimage();
-			std:this_thread::sleep_for(std::chrono::milliseconds(50));
+//			std:this_thread::sleep_for(std::chrono::milliseconds(5));
 		}
 	}
 	visualizer.close();

@@ -29,7 +29,10 @@ __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
 	velocity[id]+=acceleration[id]*paras->timestep;
 	oldAcceleration[id]=acceleration[id];
-	acceleration[id]=0; //todo test whether it is faster by doing it on host side via copybuffer and fillbuffer
+	if(id==0 || id == paras->numberOfParticles-1) {
+		acceleration[id] = id==0 ? paras->stampAcceleration : - paras->stampAcceleration; //todo test whether it is faster by doing it on host side via copybuffer and fillbuffer
+	} else
+		acceleration[id]=0;
 }
 
 __kernel void calculateAccelaration(__global int *posOffset,__global float2 *position, __global float2 *velocity,

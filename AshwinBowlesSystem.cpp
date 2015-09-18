@@ -16,17 +16,22 @@
 AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 		const float &initialdistance, const float &initialLength,
 		const float &initialHight) {
+
+
+	this->parameter = parameters;
 	//Create the openCl Stuff
 	initializeOpenCL();
 
 	//initialize particel System
 	particles = new ParticleSystem(context, queue, parameters.numberOfParticles,
 			parameters.radius, parameters.mass, initialdistance);
-	//initialize walls
-//	walls = new Walls(context, queue, initialHight * 0.5f, -initialHight * 0.5f,
-//			0, initialLength, parameters.wallstampforce, parameters.mass);
+
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
+
+	globalp = cl::NDRange(parameter.numberOfParticles);
+	localp = cl::NullRange; //todo optmiale wgsize finden
+	globalAcc=cl::NDRange((int) parameter.numberOfParticles / 2);
 
 	try {
 		program.build(devices);
@@ -41,7 +46,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 			<< program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
 			<< std::endl;
 	/// initalize paramter Buffer
-	this->parameter = parameters;
+
 
 	parameterBuffer = cl::Buffer(context,
 	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(parameter),
@@ -140,9 +145,6 @@ void AshwinBowlesSystem::initializeOpenCL() {
 
 void AshwinBowlesSystem::enqueueTimeStep() {
 	try{
-		cl::NDRange globalp(parameter.numberOfParticles);
-		cl::NDRange localp=cl::NullRange; //todo optmiale wgsize finden
-		cl::NDRange globalAcc((int)parameter.numberOfParticles/2);
 		queue.enqueueNDRangeKernel(verletStep1Kernel,cl::NullRange,globalp,localp);
 		queue.enqueueNDRangeKernel(calculateAccelarationKernel1,cl::NullRange,globalAcc,localp);
 		queue.enqueueNDRangeKernel(calculateAccelarationKernel2,cl::NullRange,globalAcc,localp);

@@ -23,7 +23,7 @@ public:
 			const int & particleNumber, ///< Number of particles
 			const float & radius=0.5, ///< radius of the particles
 			const float & mass=1, ///< particles mass
-			const float & initialdistance=0.1 ///< distance of initial particles
+			const float & initialdistance=0.1 ///< initial distance of the particles
 			);
 	~ParticleSystem();
 

@@ -29,6 +29,7 @@ typedef struct Parameters {
     cl_float rightWall;
     cl_float upperWall;
     cl_float lowerWall;
+    cl_float stampAcceleration;
 } Parameters;
 
 #endif

@@ -15,6 +15,7 @@
 
 class AshwinBowlesSystem {
 public:
+	///
 	AshwinBowlesSystem(
 			const Parameters &parameters, ///< global System Parameters
 			const float &initialdistance, ///< distance of particles at t=0
@@ -22,8 +23,12 @@ public:
 			const float &initialHight); ///< height of the box
 	~AshwinBowlesSystem();
 
-	/// adds N timesteps to the openCL queue
+	/// add a timestep to the openCL  Command queue
 	void enqueueTimeStep();
+
+	void enqueOffestupdate() {
+		queue.enqueueNDRangeKernel(updateOffsetsKernel,0,globalp,localp);
+	}
 
 	/// returns a pointer to the OffsetFreePostions
 	/// necessary for visualization
@@ -71,6 +76,10 @@ protected:
 private:
 	void initializeOpenCL();
 	cl::Program loadCLSource(const char *, const cl::Context &);
+
+	cl::NDRange globalp;
+	cl::NDRange localp; //todo optmiale wgsize finden
+	cl::NDRange globalAcc;
 
 };
 
