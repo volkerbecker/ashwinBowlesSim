@@ -55,12 +55,14 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 	/// extract kernels;
 	try {
 		verletStep1Kernel = cl::Kernel(program, "verletStep1");
-		calculateAccelarationKernel1 = cl::Kernel(program,
-				"calculateAccelaration");
-		calculateAccelarationKernel2 = cl::Kernel(program,
-				"calculateAccelaration");
+//		calculateAccelarationKernel1 = cl::Kernel(program,
+//				"calculateAccelaration");
+//		calculateAccelarationKernel2 = cl::Kernel(program,
+//				"calculateAccelaration");
 		verletStep2Kernel = cl::Kernel(program, "verletStep2");
 		updateOffsetsKernel = cl::Kernel(program, "updateOffset");
+		calculateAccelarationKernel1= cl::Kernel(program,"calculateAccelarationOnestep");
+
 	} catch (cl::Error &error) {
 		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 		exit(EXIT_FAILURE);
@@ -82,12 +84,12 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 		calculateAccelarationKernel1.setArg(4,parameterBuffer);
 		calculateAccelarationKernel1.setArg(5, (cl_int) 0);
 
-		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
-		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
-		calculateAccelarationKernel2.setArg(2,particles->getVelocityBuffer());
-		calculateAccelarationKernel2.setArg(3,particles->getAccelerationBuffer());
-		calculateAccelarationKernel2.setArg(4,parameterBuffer);
-		calculateAccelarationKernel2.setArg(5, (cl_int) 1);
+//		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
+//		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
+//		calculateAccelarationKernel2.setArg(2,particles->getVelocityBuffer());
+//		calculateAccelarationKernel2.setArg(3,particles->getAccelerationBuffer());
+//		calculateAccelarationKernel2.setArg(4,parameterBuffer);
+//		calculateAccelarationKernel2.setArg(5, (cl_int) 1);
 
 		verletStep2Kernel.setArg(0,particles->getOffsetBuffer());
 		verletStep2Kernel.setArg(1,particles->getPositionBuffer());
@@ -145,9 +147,10 @@ void AshwinBowlesSystem::initializeOpenCL() {
 
 void AshwinBowlesSystem::enqueueTimeStep() {
 	try{
+		cl::NDRange globaldouble(particles->size()*2);
 		queue.enqueueNDRangeKernel(verletStep1Kernel,cl::NullRange,globalp,localp);
-		queue.enqueueNDRangeKernel(calculateAccelarationKernel1,cl::NullRange,globalAcc,localp);
-		queue.enqueueNDRangeKernel(calculateAccelarationKernel2,cl::NullRange,globalAcc,localp);
+		queue.enqueueNDRangeKernel(calculateAccelarationKernel1,cl::NullRange,globalp,localp);
+		//queue.enqueueNDRangeKernel(calculateAccelarationKernel2,cl::NullRange,globalAcc,localp);
 		queue.enqueueNDRangeKernel(verletStep2Kernel,cl::NullRange,globalp,localp);
 	} catch (cl::Error &error) {
 			std::cerr << error.what() << "(" << error.err() << ")" << std::endl;

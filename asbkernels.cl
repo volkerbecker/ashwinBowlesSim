@@ -70,51 +70,7 @@ __kernel void verletStep2(
 		__global float2 *oldAcceleration,
 		__constant struct Parameters* paras) {
 	int id=get_global_id(0);
-	//calculate wall forces
-	if(id==0 || id == (paras->numberOfParticles-1) ) {
-		int i = (id==0 ? 0 : 1);
-		int wallOffset = (id ==0 ? paras->leftWallofset : paras->rightWallOffset);
-		float verticalWall = (id ==0 ? paras->leftWall : paras-> rightWall);
-		float overlapp=(float)(posOffset[id]-wallOffset)+(position[id].x-verticalWall);
-		if (fabs(overlapp) < paras->radius) {
-			overlapp += (i == 0 ? -paras->radius : paras->radius);
-			overlapp *=-1;
-			//printf("%i %i %f \n",id,i,overlapp);
-			float force = (
-					i == 0 ?
-							fmax(
-									paras->springConstant * overlapp
-											- paras->damping * velocity[id].x,
-									0) :
-							fmin(
-									paras->springConstant * overlapp
-											- paras->damping * velocity[id].x,
-									0));
-			acceleration[id].x += force * paras->inverseMass;
-		}
-	}
-	//horizontalWalls
-	//oben
-	{
-		float overlapp = paras->radius - (paras->upperWall - position[id].y);
-		if (overlapp > 0) {
-			float force = fmax(
-					paras->springConstant * overlapp
-							- paras->damping * velocity[id].x, 0);
-			acceleration[id].y -= force * paras->inverseMass;
-		}
-	}
 
-	//unten
-	{
-		float overlapp = paras->radius + (paras->lowerWall - position[id].y);
-		if (overlapp > 0) {
-			float force = fmax(
-					paras->springConstant * overlapp
-							- paras->damping * velocity[id].y, 0);
-			acceleration[id].y += force * paras->inverseMass;
-		}
-	}
 
 
 	velocity[id]+=0.5f*paras->timestep*(acceleration[id]-oldAcceleration[id]);
@@ -162,6 +118,52 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 	//						force, paras->damping, distance.x, distance.y, overlap,paras->diameter);
 				acceleration[id] += acc;
 				//acceleration[id+1]-=acc;
+			}
+		}
+
+	//calculate wall forces
+		if(id==0 || id == (paras->numberOfParticles-1) ) {
+			int i = (id==0 ? 0 : 1);
+			int wallOffset = (id ==0 ? paras->leftWallofset : paras->rightWallOffset);
+			float verticalWall = (id ==0 ? paras->leftWall : paras-> rightWall);
+			float overlapp=(float)(posOffset[id]-wallOffset)+(position[id].x-verticalWall);
+			if (fabs(overlapp) < paras->radius) {
+				overlapp += (i == 0 ? -paras->radius : paras->radius);
+				overlapp *=-1;
+				//printf("%i %i %f \n",id,i,overlapp);
+				float force = (
+						i == 0 ?
+								fmax(
+										paras->springConstant * overlapp
+												- paras->damping * velocity[id].x,
+										0) :
+								fmin(
+										paras->springConstant * overlapp
+												- paras->damping * velocity[id].x,
+										0));
+				acceleration[id].x += force * paras->inverseMass;
+			}
+		}
+		//horizontalWalls
+		//oben
+		{
+			float overlapp = paras->radius - (paras->upperWall - position[id].y);
+			if (overlapp > 0) {
+				float force = fmax(
+						paras->springConstant * overlapp
+								- paras->damping * velocity[id].x, 0);
+				acceleration[id].y -= force * paras->inverseMass;
+			}
+		}
+
+		//unten
+		{
+			float overlapp = paras->radius + (paras->lowerWall - position[id].y);
+			if (overlapp > 0) {
+				float force = fmax(
+						paras->springConstant * overlapp
+								- paras->damping * velocity[id].y, 0);
+				acceleration[id].y += force * paras->inverseMass;
 			}
 		}
 }

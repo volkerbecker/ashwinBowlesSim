@@ -21,8 +21,8 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=4000;
-	parameters.mass=10;
+	parameters.numberOfParticles=1024000;
+	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
 	parameters.wallstampforce=1;
@@ -36,7 +36,7 @@ int main(void) {
 	parameters.upperWall=0.75;
 	parameters.lowerWall=-0.75;
 	parameters.leftWallofset=0;
-	parameters.rightWallOffset=10000*0.001+10000+1;
+	parameters.rightWallOffset=parameters.numberOfParticles*(1+0.001)+1;
 	parameters.stampAcceleration=5*parameters.inverseMass;
 
 	puts("Hello World!!!");
@@ -53,17 +53,17 @@ int main(void) {
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			120,120,500,-60,10);
+			120,120,5000,-60,10);
 	visualizer.updateimage();
 
 
-	for(int i=0;i<5000000;++i) {
+	for(int i=0;i<50000;++i) {
 		simulation.enqueueTimeStep();
-		if(i%1000==0) {
+		if(i%100==0) {
 			simulation.enqueOffestupdate();
 			simulation.updateOffsetFreeData();
 			visualizer.updateimage();
-//			std:this_thread::sleep_for(std::chrono::milliseconds(5));
+		//	std:this_thread::sleep_for(std::chrono::milliseconds(50));
 		}
 	}
 	visualizer.close();
