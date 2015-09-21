@@ -27,12 +27,13 @@ __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	__global float2 *acceleration,__constant struct Parameters* paras){
 	int id=get_global_id(0);
 	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
-	if(id!=0) {
+	if(id==0 && paras->jamming) {
 		velocity[id]+=acceleration[id]*paras->timestep;
+		velocity[id].x=fmax(velocity[id].x,0);
+
 	} else
 	{
 		velocity[id]+=acceleration[id]*paras->timestep;
-		velocity[id].x=fmax(velocity[id].x,0);
 	}
 }
 
@@ -161,14 +162,14 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 				acc.y += force * paras->inverseMass;
 			}
 		}
-		if(id>0) {
-			velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
-			acceleration[id] = acc;
-		} else
-		{
+		if(id==0 && paras->jamming) {
 			acc.x+=paras->stampAcceleration;
 			velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
 			velocity[id].x=fmax(velocity[id].x,0);
+			acceleration[id] = acc;
+
+		} else {
+			velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
 			acceleration[id] = acc;
 		}
 }

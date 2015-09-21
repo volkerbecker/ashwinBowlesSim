@@ -38,6 +38,7 @@ int main(void) {
 	parameters.leftWallofset=0;
 	parameters.rightWallOffset=parameters.numberOfParticles*(1+0.001)+1;
 	parameters.stampAcceleration=1*parameters.inverseMass;
+	parameters.jamming=true;
 
 	puts("Hello World!!!");
 
@@ -53,7 +54,7 @@ int main(void) {
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			120,120,300,-60,10);
+			120,120,100,-60,10);
 	visualizer.updateimage();
 
 

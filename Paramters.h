@@ -9,6 +9,7 @@
 #else
 	typedef int cl_int;
 	typedef float cl_float;
+	typedef bool cl_bool;
 #endif
 
 ///This structure contains all global, constant variables
@@ -30,6 +31,7 @@ typedef struct Parameters {
     cl_float upperWall;
     cl_float lowerWall;
     cl_float stampAcceleration;
+    cl_bool jamming;
 } Parameters;
 
 #endif
