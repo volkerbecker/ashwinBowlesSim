@@ -27,7 +27,13 @@ __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	__global float2 *acceleration,__constant struct Parameters* paras){
 	int id=get_global_id(0);
 	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
-	velocity[id]+=acceleration[id]*paras->timestep;
+	if(id!=0) {
+		velocity[id]+=acceleration[id]*paras->timestep;
+	} else
+	{
+		velocity[id]+=acceleration[id]*paras->timestep;
+		velocity[id].x=fmax(velocity[id].x,0);
+	}
 }
 
 __kernel void calculateAccelaration(__global int *posOffset,__global float2 *position, __global float2 *velocity,
@@ -41,12 +47,12 @@ __kernel void calculateAccelaration(__global int *posOffset,__global float2 *pos
 		float2 pos2= (float2)(pos[gid].z,pos[gid].w);
 		float2 distance=pos2-pos1;
 		distance.x+=(posoff[gid].y-posoff[gid].x); ///evt lokalen speicher nutzen
-		float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
+		float overlap=-(length(distance)-paras->diameter); /// todo test whether precision is sufficient
 		if(overlap>0) {
 			__global float4 *vel = (__global void*)(velocity+start);
 			float2 vel1=(float2)(vel[gid].x,vel[gid].y);
 			float2 vel2=(float2)(vel[gid].z,vel[gid].w);
-			distance=fast_normalize(distance); // calculate the normal vector
+			distance=normalize(distance); // calculate the normal vector
 			float force=-fmax(overlap*paras->springConstant+dot(vel1-vel2,distance)*paras->damping,0);
 			float2 acc = (force) * paras->inverseMass * distance;
 //			if (id == 0)
@@ -91,9 +97,9 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 	if( (id+1) < paras->numberOfParticles) {
 		float2 distance=position[id+1]-position[id];
 		distance.x+=(posOffset[id+1]-posOffset[id]); ///evt lokalen speicher nutzen
-		float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
+		float overlap=-(length(distance)-paras->diameter); /// todo test whether precision is sufficient
 		if(overlap>0) {
-			distance=fast_normalize(distance); // calculate the normal vector
+			distance=normalize(distance); // calculate the normal vector
 			float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
 			acc = (force) * paras->inverseMass * distance;
 		}
@@ -102,10 +108,10 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 	if( (id) >0 ) {
 			float2 distance=position[id-1]-position[id];
 			distance.x+=(posOffset[id-1]-posOffset[id]); ///evt lokalen speicher nutzen
-			float overlap=-(fast_length(distance)-paras->diameter); /// todo test whether precision is sufficient
+			float overlap=-(length(distance)-paras->diameter); /// todo test whether precision is sufficient
 			if(overlap>0) {
-				distance=fast_normalize(distance); // calculate the normal vector
-				float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
+				distance=normalize(distance); // calculate the normal vector
+				float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id-1],distance)*paras->damping,0);
 				acc += (force) * paras->inverseMass * distance;
 			}
 		}
@@ -155,6 +161,14 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 				acc.y += force * paras->inverseMass;
 			}
 		}
-		velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
-		acceleration[id] = acc;
+		if(id>0) {
+			velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
+			acceleration[id] = acc;
+		} else
+		{
+			acc.x+=paras->stampAcceleration;
+			velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
+			velocity[id].x=fmax(velocity[id].x,0);
+			acceleration[id] = acc;
+		}
 }
