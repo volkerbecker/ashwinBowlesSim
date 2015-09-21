@@ -21,7 +21,7 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=1024000;
+	parameters.numberOfParticles=102400;
 	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
@@ -57,9 +57,9 @@ int main(void) {
 	visualizer.updateimage();
 
 
-	for(int i=0;i<50000;++i) {
+	for(int i=0;i<100000;++i) {
 		simulation.enqueueTimeStep();
-		if(i%100==0) {
+		if(i%1000==0) {
 			simulation.enqueOffestupdate();
 			simulation.updateOffsetFreeData();
 			visualizer.updateimage();

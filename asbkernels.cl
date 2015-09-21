@@ -20,17 +20,14 @@ typedef struct int4 {
 } int4;
 #endif  //um eclipse auszutriksen
 
+#define workgroupsize 256
 #include "/home/becker/workspace/ashwinBowlesSim/Paramters.h"
 
 __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
-	__global float2 *acceleration,__global float2 *oldAcceleration,
-	__constant struct Parameters* paras){
+	__global float2 *acceleration,__constant struct Parameters* paras){
 	int id=get_global_id(0);
 	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
 	velocity[id]+=acceleration[id]*paras->timestep;
-	oldAcceleration[id]=acceleration[id];
-	acceleration[id]=0;
-	//acceleration[id] = id==0 ? paras->stampAcceleration : 0; //todo test whether it is faster by doing it on host side via copybuffer and fillbuffer
 }
 
 __kernel void calculateAccelaration(__global int *posOffset,__global float2 *position, __global float2 *velocity,
@@ -88,6 +85,9 @@ __kernel void updateOffset(__global int *posOffsets,__global float2 *positions) 
 __kernel void calculateAccelarationOnestep(__global int *posOffset,__global float2 *position, __global float2 *velocity,
 		__global float2 *acceleration,__constant struct Parameters* paras,const int start) {
 	int id=get_global_id(0);
+	float2 acc=0;
+
+	//caclulate accelaration due to the nearest right neighbor
 	if( (id+1) < paras->numberOfParticles) {
 		float2 distance=position[id+1]-position[id];
 		distance.x+=(posOffset[id+1]-posOffset[id]); ///evt lokalen speicher nutzen
@@ -95,15 +95,10 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 		if(overlap>0) {
 			distance=fast_normalize(distance); // calculate the normal vector
 			float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
-			float2 acc = (force) * paras->inverseMass * distance;
-//			if (id == 0)
-//				printf(
-//						"Force %f, Damping %f, Distance %f,%f overlapp: %f diameter %f\n",
-//						force, paras->damping, distance.x, distance.y, overlap,paras->diameter);
-			acceleration[id] += acc;
-			//acceleration[id+1]-=acc;
+			acc = (force) * paras->inverseMass * distance;
 		}
 	}
+	//calculate acceleration due to the nearest left neighbor
 	if( (id) >0 ) {
 			float2 distance=position[id-1]-position[id];
 			distance.x+=(posOffset[id-1]-posOffset[id]); ///evt lokalen speicher nutzen
@@ -111,13 +106,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 			if(overlap>0) {
 				distance=fast_normalize(distance); // calculate the normal vector
 				float force=-fmax(overlap*paras->springConstant+dot(velocity[id]-velocity[id+1],distance)*paras->damping,0);
-				float2 acc = (force) * paras->inverseMass * distance;
-	//			if (id == 0)
-	//				printf(
-	//						"Force %f, Damping %f, Distance %f,%f overlapp: %f diameter %f\n",
-	//						force, paras->damping, distance.x, distance.y, overlap,paras->diameter);
-				acceleration[id] += acc;
-				//acceleration[id+1]-=acc;
+				acc += (force) * paras->inverseMass * distance;
 			}
 		}
 
@@ -141,7 +130,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 										paras->springConstant * overlapp
 												- paras->damping * velocity[id].x,
 										0));
-				acceleration[id].x += force * paras->inverseMass;
+				acc.x += force * paras->inverseMass;
 			}
 		}
 		//horizontalWalls
@@ -152,7 +141,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 				float force = fmax(
 						paras->springConstant * overlapp
 								- paras->damping * velocity[id].x, 0);
-				acceleration[id].y -= force * paras->inverseMass;
+				acc.y -= force * paras->inverseMass;
 			}
 		}
 
@@ -163,7 +152,9 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,__global floa
 				float force = fmax(
 						paras->springConstant * overlapp
 								- paras->damping * velocity[id].y, 0);
-				acceleration[id].y += force * paras->inverseMass;
+				acc.y += force * paras->inverseMass;
 			}
 		}
+		velocity[id]+=0.5f*paras->timestep*(acc-acceleration[id]);
+		acceleration[id] = acc;
 }
