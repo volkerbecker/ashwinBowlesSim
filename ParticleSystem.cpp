@@ -83,8 +83,8 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 		offset[i]=tmpOffset;
 		position[i].s[0]=tmpPositionx;
 		position[i].s[1]=0*(drand48()*2-1);;  // y_i=0
-		velocity[i].s[0]=1*(drand48()*2-1);
-		velocity[i].s[1]=1*(drand48()*2-1);
+		velocity[i].s[0]=2*(drand48()*2-1);
+		velocity[i].s[1]=2*(drand48()*2-1);
 		acceleration[i].s[0]=acceleration[i].s[1]=0; //a=0
 		tmpPositionx+=deltaX;
 		tmpOffset+=trunc(tmpPositionx);
@@ -104,10 +104,10 @@ void ParticleSystem::getParticleDataFromDevice() {
 			sizeof(cl_float2) * acceleration.size(), acceleration.data());
 }
 
-void ParticleSystem::updateOffsetfreePositions() {
+void ParticleSystem::updateOffsetfreePositions(const int &columnlength) {
 	getParticleDataFromDevice();
 	for(int i=0;i<size();++i) {
-		cl_double2 tmp=getPosition(i);
+		cl_double2 tmp=getPosition(i,columnlength);
 		offsetfreepositions[i].s[0]=(float)tmp.s[0];
 		offsetfreepositions[i].s[1]=(float)tmp.s[1];
 	}

@@ -32,7 +32,8 @@ typedef struct Parameters {
     cl_float lowerWall;
     cl_float stampAcceleration;
     cl_bool jamming;
-    cl_bool viskosity;
+    cl_float viskosity;
+    cl_float tappingAmplitude;
 } Parameters;
 
 #endif

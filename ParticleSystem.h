@@ -10,6 +10,7 @@
 #include <vector>
 #include <CL/cl.hpp>
 #include <iostream>
+#include <climits>
 
 using namespace std;
 
@@ -77,11 +78,13 @@ public:
 
 	///< get the position of the i'th particle
 	cl_double2 getPosition(
-			int number ///< return the position of the i'th particle
-			) {
+			int number, ///< return the position of the i'th particle
+			int columnlength=INT_MAX) {
 		cl_double2 tmp;
-		tmp.s[0]=(double)offset[number]+position[number].s[0];
-		tmp.s[1]=(double)position[number].s[1];
+		int tmpoffsetx=offset[number]%columnlength;
+		double tmpoffsety=(offset[number]/columnlength)*4*radius();
+		tmp.s[0]=tmpoffsetx+position[number].s[0];
+		tmp.s[1]=(double)position[number].s[1]-tmpoffsety;
 		return tmp;
 	}
 
@@ -90,7 +93,8 @@ public:
 	void getParticleDataFromDevice();
 
 	// update the offsetfree position buffer for visualization
-	void updateOffsetfreePositions();
+	void updateOffsetfreePositions(
+			const int &columnlengt=100); ///< if the offset%comulmlength=0 a new  row appears
 
 	/// get a read only pointer to the offset free positions
 	const float* getOffsetFreePositionPointer() {

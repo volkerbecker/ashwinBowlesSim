@@ -34,7 +34,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 
 	globalp = cl::NDRange(parameter.numberOfParticles);
 	localp = cl::NullRange; //todo optmiale wgsize finden
-	globalAcc=cl::NDRange((int) parameter.numberOfParticles / 2);
+	//globalAcc=cl::NDRange((int) parameter.numberOfParticles / 2);
 
 	try {
 		program.build(devices);
@@ -45,6 +45,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 				<< std::endl;
 		exit(-1);
 	}
+
 	std::cout << "Build Log:\t "
 			<< program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
 			<< std::endl;
@@ -54,6 +55,8 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 	parameterBuffer = cl::Buffer(context,
 	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(parameter),
 			&this->parameter);
+
+	timeBuffer = cl::Buffer(context,CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,sizeof(asbTime),&asbTime);
 
 	/// extract kernels;
 	try {
@@ -84,8 +87,9 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 		calculateAccelarationKernel1.setArg(1,particles->getPositionBuffer());
 		calculateAccelarationKernel1.setArg(2,particles->getVelocityBuffer());
 		calculateAccelarationKernel1.setArg(3,particles->getAccelerationBuffer());
-		calculateAccelarationKernel1.setArg(4,parameterBuffer);
-		calculateAccelarationKernel1.setArg(5, (cl_int) 0);
+		calculateAccelarationKernel1.setArg(4,timeBuffer);
+		calculateAccelarationKernel1.setArg(5,parameterBuffer);
+		calculateAccelarationKernel1.setArg(6, (cl_int) 0);
 
 //		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
 //		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
