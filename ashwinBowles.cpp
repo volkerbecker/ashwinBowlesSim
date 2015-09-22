@@ -21,15 +21,15 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=102400;
+	parameters.numberOfParticles=10240;
 	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
 	parameters.wallstampforce=1;
 	parameters.timestep=0.001;
 	parameters.timestepSq=parameters.timestep*parameters.timestep;
-	parameters.springConstant=2000;
-	parameters.damping=5;
+	parameters.springConstant=50000;
+	parameters.damping=50;
 	parameters.inverseMass=1/parameters.mass;
 	parameters.leftWall=0;
 	parameters.rightWall=0;
@@ -38,7 +38,8 @@ int main(void) {
 	parameters.leftWallofset=0;
 	parameters.rightWallOffset=parameters.numberOfParticles*(1+0.001)+1;
 	parameters.stampAcceleration=10*parameters.inverseMass;
-	parameters.jamming=true;
+	parameters.jamming=false;
+	parameters.viskosity=0;
 
 	puts("Hello World!!!");
 
@@ -48,19 +49,20 @@ int main(void) {
 	//simulation.upDateHostMemory();
 
 	simulation.updateOffsetFreeData();
+	cout << (*(simulation.getPrtToOffsetFreePositions())) << endl;;
 
 
 	visualizer.initializeSystem(
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			120,120,1000,-60,10);
+			120,120,1380,-60,10);
 	visualizer.updateimage();
+	std:this_thread::sleep_for(std::chrono::seconds(5));
 
-
-	for(int i=0;i<200000;++i) {
+	for(int i=0;i<20000000;++i) {
 		simulation.enqueueTimeStep();
-		if(i%1000==0) {
+		if(i%100==0) {
 			simulation.enqueOffestupdate();
 			simulation.updateOffsetFreeData();
 			visualizer.updateimage();

@@ -97,6 +97,11 @@ public:
 		return (float*)offsetfreepositions.data();
 	}
 
+	/// sets the system to the densest possible state
+	void createDensestState(
+			float wallDistance, ///< the distance of the vertical walls
+			float rightWall); ///< the right wall
+
 	///ostream operator
 	friend ostream& operator << (ostream& os, ParticleSystem & ps);
 

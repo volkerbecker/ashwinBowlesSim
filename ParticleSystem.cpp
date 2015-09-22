@@ -47,6 +47,27 @@ ParticleSystem::~ParticleSystem() {
 	// TODO Auto-generated destructor stub
 }
 
+
+void ParticleSystem::createDensestState(
+		float wallDistance, ///< the distance of the vertical walls
+		float rightWall) {///< the right wall
+
+	double phi=acos(wallDistance/2/radius()-1);
+	double dx=sin(phi)*2*radius();
+	double tmpPosition=rightWall-radius();
+	double yposition=wallDistance/2-radius();
+	int sign=1;
+	for(int i=size()-1;i>=0;i--)  {
+		offset[i]=(int)tmpPosition;
+		position[i].s[0]=(float)(tmpPosition-offset[i]);
+		position[i].s[1]=(float)(sign*yposition);
+		sign*=-1;
+		tmpPosition-=dx;
+	}
+	queue.enqueueWriteBuffer(positionBuffer,CL_TRUE,0,sizeof(cl_float2)*size(),position.data());
+	queue.enqueueWriteBuffer(offsetBuffer,CL_TRUE,0,sizeof(cl_int)*size(),offset.data());
+}
+
 void ParticleSystem::createParticleString(const float & initialDistance) {
 
 	//resize the vectors
@@ -61,9 +82,9 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 	for(uint i=0;i<size();++i) {
 		offset[i]=tmpOffset;
 		position[i].s[0]=tmpPositionx;
-		position[i].s[1]=0.1*(drand48()*2-1);;  // y_i=0
-		velocity[i].s[0]=0.1*(drand48()*2-1);
-		velocity[i].s[1]=0.1*(drand48()*2-1);
+		position[i].s[1]=0*(drand48()*2-1);;  // y_i=0
+		velocity[i].s[0]=1*(drand48()*2-1);
+		velocity[i].s[1]=1*(drand48()*2-1);
 		acceleration[i].s[0]=acceleration[i].s[1]=0; //a=0
 		tmpPositionx+=deltaX;
 		tmpOffset+=trunc(tmpPositionx);

@@ -49,13 +49,16 @@ inline float2 calcAcceleration(
 __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	__global float2 *acceleration,__constant struct Parameters* paras){
 	int id=get_global_id(0);
-	position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
+
 	if(id==0 && paras->jamming) {
+		position[id].x+=fmax(velocity[id].x*paras->timestep+0.5f*acceleration[id].x*paras->timestepSq,0);
+		position[id].y+=velocity[id].y*paras->timestep+0.5f*acceleration[id].y*paras->timestepSq;
 		velocity[id]+=acceleration[id]*paras->timestep;
 		velocity[id].x=fmax(velocity[id].x,0);
 
 	} else
 	{
+		position[id]+=velocity[id]*paras->timestep+0.5f*acceleration[id]*paras->timestepSq;
 		velocity[id]+=acceleration[id]*paras->timestep;
 	}
 }
@@ -138,23 +141,18 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 	//oben
 	{
 		float overlapp = paras->radius - (paras->upperWall - position[id].y);
-		if (overlapp > 0) {
-			float force = fmax(
-					paras->springConstant * overlapp
-							- paras->damping * velocity[id].x, 0);
-			acc.y -= force * paras->inverseMass;
-		}
+		float force = overlapp>0 ?
+					fmax( paras->springConstant * overlapp
+						- paras->damping * velocity[id].x, 0) : 0;
+		acc.y -= force * paras->inverseMass;
 	}
-
 	//unten
 	{
 		float overlapp = paras->radius + (paras->lowerWall - position[id].y);
-		if (overlapp > 0) {
-			float force = fmax(
-					paras->springConstant * overlapp
-							- paras->damping * velocity[id].y, 0);
+			float force = overlapp >0 ? fmax(
+				paras->springConstant * overlapp
+				- paras->damping * velocity[id].y, 0) : 0;
 			acc.y += force * paras->inverseMass;
-		}
 	}
 	//calculate wall forces
 	if (id == 0 || id == (paras->numberOfParticles - 1)) {
@@ -188,7 +186,9 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 		acceleration[id] = acc;
 
 	} else {
+		acc-=paras->viskosity*velocity[id]*paras->inverseMass;
 		velocity[id] += 0.5f * paras->timestep * (acc - acceleration[id]);
 		acceleration[id] = acc;
 	}
+
 }

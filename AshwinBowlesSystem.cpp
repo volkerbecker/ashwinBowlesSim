@@ -26,6 +26,9 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 	particles = new ParticleSystem(context, queue, parameters.numberOfParticles,
 			parameters.radius, parameters.mass, initialdistance);
 
+	particles->createDensestState(parameters.upperWall-
+			parameters.lowerWall,parameters.rightWall+parameters.rightWallOffset);
+
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
 
