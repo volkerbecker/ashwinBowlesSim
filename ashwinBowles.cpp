@@ -21,7 +21,7 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=1024;
+	parameters.numberOfParticles=102400;
 	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
@@ -37,7 +37,7 @@ int main(void) {
 	parameters.lowerWall=-0.75;
 	parameters.leftWallofset=0;
 	parameters.rightWallOffset=parameters.numberOfParticles*(1+0.001)+1;
-	parameters.stampAcceleration=1*parameters.inverseMass;
+	parameters.stampAcceleration=10*parameters.inverseMass;
 	parameters.jamming=true;
 
 	puts("Hello World!!!");
@@ -54,11 +54,11 @@ int main(void) {
 			simulation.getPrtToOffsetFreePositions(),
 			parameters.numberOfParticles,
 			parameters.radius,
-			120,120,100,-60,10);
+			120,120,1000,-60,10);
 	visualizer.updateimage();
 
 
-	for(int i=0;i<20000000;++i) {
+	for(int i=0;i<200000;++i) {
 		simulation.enqueueTimeStep();
 		if(i%1000==0) {
 			simulation.enqueOffestupdate();
