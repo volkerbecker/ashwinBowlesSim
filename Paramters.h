@@ -6,6 +6,24 @@
 
 #ifndef __OPENCL_VERSION__
 #include <CL/cl.hpp>
+#include <string>
+
+typedef enum {
+	PCHAIN,PDENSEST,PLOOSEST,PFILE, ///< particle initialisation types
+	RANDOMDELTA, ///< protocol type
+	ENERGY ///< taping kriterion
+} asbEnum;
+
+typedef struct HostParameters {
+	bool takeSnapShots; ///< sollen regelmaeßige snapshots gemacht werden?
+	std::string baseName; ///<basename für Ausgabedateien
+	int snapshotIntervall; ///< number of timesteps between snapshots
+	int timestepOffset; ///< wenn Simlation nicht bei t=0 anfaenft
+
+	bool visualization; ///< soll visualisiert werden
+	bool savesBitmaps; ///sollen visulisierungen als png Dateien gespeichert werden?
+	int visualizerIntervall; ///< timesteps between visualization
+} HostParameters;
 #else
 	typedef int cl_int;
 	typedef float cl_float;

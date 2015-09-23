@@ -13,29 +13,37 @@
 
 #define OPENCL_PROGRAM_NAME "asbkernels.cl"
 
+AshwinBowlesSystem::AshwinBowlesSystem() {}
+
+
 AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 		const float &initialdistance, const float &initialLength,
 		const float &initialHight) {
 
 
+	setup(parameters, initialdistance);
+}
+
+AshwinBowlesSystem::~AshwinBowlesSystem() {
+	if(particles !=nullptr) delete particles;
+	//delete walls;
+}
+
+void AshwinBowlesSystem::setup(const Parameters& parameters,
+		const float& initialdistance) {
 	this->parameter = parameters;
 	//Create the openCl Stuff
 	initializeOpenCL();
-
 	//initialize particel System
 	particles = new ParticleSystem(context, queue, parameters.numberOfParticles,
 			parameters.radius, parameters.mass, initialdistance);
-
-	particles->createDensestState(parameters.upperWall-
-			parameters.lowerWall,parameters.rightWall+parameters.rightWallOffset);
-
+	particles->createDensestState(parameters.upperWall - parameters.lowerWall,
+			parameters.rightWall + parameters.rightWallOffset);
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
-
 	globalp = cl::NDRange(parameter.numberOfParticles);
 	localp = cl::NullRange; //todo optmiale wgsize finden
 	//globalAcc=cl::NDRange((int) parameter.numberOfParticles / 2);
-
 	try {
 		program.build(devices);
 	} catch (cl::Error &error) {
@@ -45,78 +53,70 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 				<< std::endl;
 		exit(-1);
 	}
-
 	std::cout << "Build Log:\t "
 			<< program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
 			<< std::endl;
 	/// initalize paramter Buffer
-
-
 	parameterBuffer = cl::Buffer(context,
 	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(parameter),
 			&this->parameter);
-
-	timeBuffer = cl::Buffer(context,CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,sizeof(asbTime),&asbTime);
-
+	timeBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+			sizeof(asbTime), &asbTime);
 	/// extract kernels;
 	try {
 		verletStep1Kernel = cl::Kernel(program, "verletStep1");
-//		calculateAccelarationKernel1 = cl::Kernel(program,
-//				"calculateAccelaration");
-//		calculateAccelarationKernel2 = cl::Kernel(program,
-//				"calculateAccelaration");
-//		verletStep2Kernel = cl::Kernel(program, "verletStep2");
+		//		calculateAccelarationKernel1 = cl::Kernel(program,
+		//				"calculateAccelaration");
+		//		calculateAccelarationKernel2 = cl::Kernel(program,
+		//				"calculateAccelaration");
+		//		verletStep2Kernel = cl::Kernel(program, "verletStep2");
 		updateOffsetsKernel = cl::Kernel(program, "updateOffset");
-		calculateAccelarationKernel1= cl::Kernel(program,"calculateAccelarationOnestep");
+		calculateAccelarationKernel1 = cl::Kernel(program,
+				"calculateAccelarationOnestep");
 
 	} catch (cl::Error &error) {
 		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
 	///set Kernel arguments
-
 	try {
-		verletStep1Kernel.setArg(0,particles->getPositionBuffer());
-		verletStep1Kernel.setArg(1,particles->getVelocityBuffer());
-		verletStep1Kernel.setArg(2,particles->getAccelerationBuffer());
-//		verletStep1Kernel.setArg(3,particles->getOldAccelerationBuffer());
+		verletStep1Kernel.setArg(0, particles->getPositionBuffer());
+		verletStep1Kernel.setArg(1, particles->getVelocityBuffer());
+		verletStep1Kernel.setArg(2, particles->getAccelerationBuffer());
+		//		verletStep1Kernel.setArg(3,particles->getOldAccelerationBuffer());
 		verletStep1Kernel.setArg(3, parameterBuffer);
 
-		calculateAccelarationKernel1.setArg(0,particles->getOffsetBuffer());
-		calculateAccelarationKernel1.setArg(1,particles->getPositionBuffer());
-		calculateAccelarationKernel1.setArg(2,particles->getVelocityBuffer());
-		calculateAccelarationKernel1.setArg(3,particles->getAccelerationBuffer());
-		calculateAccelarationKernel1.setArg(4,timeBuffer);
-		calculateAccelarationKernel1.setArg(5,parameterBuffer);
+		calculateAccelarationKernel1.setArg(0, particles->getOffsetBuffer());
+		calculateAccelarationKernel1.setArg(1, particles->getPositionBuffer());
+		calculateAccelarationKernel1.setArg(2, particles->getVelocityBuffer());
+		calculateAccelarationKernel1.setArg(3,
+				particles->getAccelerationBuffer());
+		calculateAccelarationKernel1.setArg(4, timeBuffer);
+		calculateAccelarationKernel1.setArg(5, parameterBuffer);
 		calculateAccelarationKernel1.setArg(6, (cl_int) 0);
 
-//		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
-//		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
-//		calculateAccelarationKernel2.setArg(2,particles->getVelocityBuffer());
-//		calculateAccelarationKernel2.setArg(3,particles->getAccelerationBuffer());
-//		calculateAccelarationKernel2.setArg(4,parameterBuffer);
-//		calculateAccelarationKernel2.setArg(5, (cl_int) 1);
+		//		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
+		//		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
+		//		calculateAccelarationKernel2.setArg(2,particles->getVelocityBuffer());
+		//		calculateAccelarationKernel2.setArg(3,particles->getAccelerationBuffer());
+		//		calculateAccelarationKernel2.setArg(4,parameterBuffer);
+		//		calculateAccelarationKernel2.setArg(5, (cl_int) 1);
 
-//		verletStep2Kernel.setArg(0,particles->getOffsetBuffer());
-//		verletStep2Kernel.setArg(1,particles->getPositionBuffer());
-//		verletStep2Kernel.setArg(2,particles->getVelocityBuffer());
-//		verletStep2Kernel.setArg(3,particles->getAccelerationBuffer());
-//		verletStep2Kernel.setArg(4,particles->getOldAccelerationBuffer());
-//		verletStep2Kernel.setArg(5,parameterBuffer);
+		//		verletStep2Kernel.setArg(0,particles->getOffsetBuffer());
+		//		verletStep2Kernel.setArg(1,particles->getPositionBuffer());
+		//		verletStep2Kernel.setArg(2,particles->getVelocityBuffer());
+		//		verletStep2Kernel.setArg(3,particles->getAccelerationBuffer());
+		//		verletStep2Kernel.setArg(4,particles->getOldAccelerationBuffer());
+		//		verletStep2Kernel.setArg(5,parameterBuffer);
 
-		updateOffsetsKernel.setArg(0,particles->getOffsetBuffer());
-		updateOffsetsKernel.setArg(1,particles->getPositionBuffer());
+		updateOffsetsKernel.setArg(0, particles->getOffsetBuffer());
+		updateOffsetsKernel.setArg(1, particles->getPositionBuffer());
 	} catch (cl::Error &error) {
 		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
 
-AshwinBowlesSystem::~AshwinBowlesSystem() {
-	delete particles;
-	//delete walls;
-}
 
 void AshwinBowlesSystem::initializeOpenCL() {
 	//Create the openCl Stuff

@@ -16,6 +16,7 @@
 
 class AshwinBowlesSystem {
 public:
+	AshwinBowlesSystem();
 	///
 	AshwinBowlesSystem(
 			const Parameters &parameters, ///< global System Parameters
@@ -122,6 +123,7 @@ protected:
 private:
 	void initializeOpenCL();
 	cl::Program loadCLSource(const char *, const cl::Context &);
+	void setup(const Parameters& parameters, const float& initialdistance);
 
 	cl::NDRange globalp;
 	cl::NDRange localp; //todo optmiale wgsize finden
