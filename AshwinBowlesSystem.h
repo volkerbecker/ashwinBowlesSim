@@ -87,6 +87,10 @@ public:
 		}
 	}
 
+	void velocityPulse(const cl_float2 &amplitude) {
+		particles->setRandomVelocity(amplitude);
+	}
+
 protected:
 	std::vector<cl::Platform> plattforms;
 	std::vector<cl::Device> devices;

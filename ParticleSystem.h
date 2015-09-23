@@ -106,6 +106,8 @@ public:
 			float wallDistance, ///< the distance of the vertical walls
 			float rightWall); ///< the right wall
 
+	void setRandomVelocity(const cl_float2 &Amplitude);
+
 	///ostream operator
 	friend ostream& operator << (ostream& os, ParticleSystem & ps);
 

@@ -82,9 +82,9 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 	for(uint i=0;i<size();++i) {
 		offset[i]=tmpOffset;
 		position[i].s[0]=tmpPositionx;
-		position[i].s[1]=0*(drand48()*2-1);;  // y_i=0
-		velocity[i].s[0]=2*(drand48()*2-1);
-		velocity[i].s[1]=2*(drand48()*2-1);
+		position[i].s[1]=0*(drand48()*2-2);;  // y_i=0
+		velocity[i].s[0]=0.1*(drand48()*2-2);
+		velocity[i].s[1]=0.1*(drand48()*2-2);
 		acceleration[i].s[0]=acceleration[i].s[1]=0; //a=0
 		tmpPositionx+=deltaX;
 		tmpOffset+=trunc(tmpPositionx);
@@ -111,6 +111,16 @@ void ParticleSystem::updateOffsetfreePositions(const int &columnlength) {
 		offsetfreepositions[i].s[0]=(float)tmp.s[0];
 		offsetfreepositions[i].s[1]=(float)tmp.s[1];
 	}
+}
+
+void ParticleSystem::setRandomVelocity(const cl_float2 &Amplitude) {
+	for (uint i = 0; i < size(); ++i) {
+		velocity[i].s[0] = Amplitude.s[0] * (drand48() * 2 - 1);
+		velocity[i].s[1] = Amplitude.s[1] * (drand48() * 2 - 1);
+	}
+	queue.enqueueWriteBuffer(velocityBuffer, CL_FALSE, 0,
+			size() * sizeof(cl_float2), velocity.data());
+	;
 }
 
 ostream& operator <<(ostream& os, ParticleSystem & ps) {

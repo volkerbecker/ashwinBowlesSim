@@ -23,15 +23,15 @@ int main(void) {
 
 	Parameters parameters;
 
-	parameters.numberOfParticles=102400;
+	parameters.numberOfParticles=10240;
 	parameters.mass=1;
 	parameters.radius=0.5;
 	parameters.diameter=parameters.radius*2;
 	parameters.wallstampforce=1;
-	parameters.timestep=0.0005;
+	parameters.timestep=0.001;
 	parameters.timestepSq=parameters.timestep*parameters.timestep;
-	parameters.springConstant=10000;
-	parameters.damping=0;
+	parameters.springConstant=4000;
+	parameters.damping=parameters.springConstant*0.001;
 	parameters.inverseMass=1/parameters.mass;
 	parameters.leftWall=0;
 	parameters.rightWall=0;
@@ -39,10 +39,10 @@ int main(void) {
 	parameters.lowerWall=-0.75;
 	parameters.leftWallofset=0;
 	parameters.rightWallOffset=parameters.numberOfParticles*(1+0.001)+1;
-	parameters.stampAcceleration=0*parameters.inverseMass;
-	parameters.jamming=false;
-	parameters.viskosity=0.00;
-	parameters.tappingAmplitude=0;
+	parameters.stampAcceleration=5*parameters.inverseMass;
+	parameters.jamming=true;
+	parameters.viskosity=0.01;
+	parameters.tappingAmplitude=1;
 
 	puts("Hello World!!!");
 
@@ -77,9 +77,9 @@ int main(void) {
 	std:this_thread::sleep_for(std::chrono::seconds(5));
 
 	double Ekin,Epot;
-	for(int i=0;i<4000000;++i) {
+	for(int i=0;i<40000000;++i) {
 		simulation.enqueueTimeStep();
-		if(i%2000==0) {
+		if(i%10000==0) {
 			simulation.enqueOffestupdate();
 			simulation.updateOffsetFreeData(150);
 			visualizer.updateimage();
@@ -87,8 +87,11 @@ int main(void) {
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 			energyStream << i << "\t" << Ekin << "\t" << Epot << "\t" << Ekin+Epot << "\n";
 		//	std:this_thread::sleep_for(std::chrono::milliseconds(50));
+			if(Ekin<1e-3) {
+					simulation.velocityPulse((cl_float2){0,10});
+						}
+			}
 		}
-	}
 	visualizer.close();
 
 
