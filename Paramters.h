@@ -36,7 +36,6 @@ typedef struct Parameters {
     cl_float mass; ///<particles mass
     cl_float radius; ///<particles radius
     cl_float diameter; ///< particles dameter = 2 * radius
-    cl_float wallstampforce; ///< the stamp force for jamming
     cl_float timestep;
     cl_float timestepSq;
     cl_float springConstant;

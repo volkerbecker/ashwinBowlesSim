@@ -33,7 +33,6 @@ int main(void) {
 	kernelHostParameters.mass=1;
 	kernelHostParameters.radius=0.5;
 	kernelHostParameters.diameter=kernelHostParameters.radius*2;
-	kernelHostParameters.wallstampforce=1;
 	kernelHostParameters.timestep=0.001;
 	kernelHostParameters.timestepSq=kernelHostParameters.timestep*kernelHostParameters.timestep;
 	kernelHostParameters.springConstant=4000;

@@ -45,5 +45,30 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 	if(keyword == "PNUMBER"){
 		infile >> khParamters.numberOfParticles;
 	}
-	else ;
+	else if(keyword == "PMASS") {
+		infile >> khParamters.mass;
+	}
+	else if(keyword == "PRADIUS") {
+		infile >> khParamters.radius;
+		khParamters.diameter=2*khParamters.radius;
+	}
+	else if(keyword == "TIMESTEP") {
+		infile >> khParamters.timestep;
+		khParamters.timestepSq=khParamters.timestep*khParamters.timestep;
+	}
+	else if(keyword == "SPRINGCONST") {
+		infile >> khParamters.springConstant;
+	}
+	else if(keyword == "NORMALDAMPING") {
+		infile >> khParamters.damping;
+	}
+	else if(keyword == "SYSTEMSIZE") {
+		double width,hight;
+		infile >> width;
+		infile >> hight;
+		khParamters.leftWallofset = 0;
+		khParamters.rightWallOffset = (int) width;
+		khParamters.upperWall=hight/2;
+		khParamters.lowerWall=-khParamters.upperWall;
+	}
 }
