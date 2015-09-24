@@ -17,11 +17,10 @@ AshwinBowlesSystem::AshwinBowlesSystem() {}
 
 
 AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
-		const float &initialdistance, const float &initialLength,
-		const float &initialHight) {
+		const HostParameters & hostparameters) {
 
 
-	setup(parameters, initialdistance);
+	setup(parameters, hostparameters);
 }
 
 AshwinBowlesSystem::~AshwinBowlesSystem() {
@@ -30,13 +29,13 @@ AshwinBowlesSystem::~AshwinBowlesSystem() {
 }
 
 void AshwinBowlesSystem::setup(const Parameters& parameters,
-		const float& initialdistance) {
+		const HostParameters & hostParameters) {
 	this->parameter = parameters;
+
 	//Create the openCl Stuff
 	initializeOpenCL();
 	//initialize particel System
-	particles = new ParticleSystem(context, queue, parameters.numberOfParticles,
-			parameters.radius, parameters.mass, initialdistance);
+	particles = new ParticleSystem(context, queue, parameters,hostParameters);
 	particles->createDensestState(parameters.upperWall - parameters.lowerWall,
 			parameters.rightWall + parameters.rightWallOffset);
 	//compile the opencl program
@@ -65,11 +64,6 @@ void AshwinBowlesSystem::setup(const Parameters& parameters,
 	/// extract kernels;
 	try {
 		verletStep1Kernel = cl::Kernel(program, "verletStep1");
-		//		calculateAccelarationKernel1 = cl::Kernel(program,
-		//				"calculateAccelaration");
-		//		calculateAccelarationKernel2 = cl::Kernel(program,
-		//				"calculateAccelaration");
-		//		verletStep2Kernel = cl::Kernel(program, "verletStep2");
 		updateOffsetsKernel = cl::Kernel(program, "updateOffset");
 		calculateAccelarationKernel1 = cl::Kernel(program,
 				"calculateAccelarationOnestep");
@@ -94,20 +88,6 @@ void AshwinBowlesSystem::setup(const Parameters& parameters,
 		calculateAccelarationKernel1.setArg(4, timeBuffer);
 		calculateAccelarationKernel1.setArg(5, parameterBuffer);
 		calculateAccelarationKernel1.setArg(6, (cl_int) 0);
-
-		//		calculateAccelarationKernel2.setArg(0,particles->getOffsetBuffer());
-		//		calculateAccelarationKernel2.setArg(1,particles->getPositionBuffer());
-		//		calculateAccelarationKernel2.setArg(2,particles->getVelocityBuffer());
-		//		calculateAccelarationKernel2.setArg(3,particles->getAccelerationBuffer());
-		//		calculateAccelarationKernel2.setArg(4,parameterBuffer);
-		//		calculateAccelarationKernel2.setArg(5, (cl_int) 1);
-
-		//		verletStep2Kernel.setArg(0,particles->getOffsetBuffer());
-		//		verletStep2Kernel.setArg(1,particles->getPositionBuffer());
-		//		verletStep2Kernel.setArg(2,particles->getVelocityBuffer());
-		//		verletStep2Kernel.setArg(3,particles->getAccelerationBuffer());
-		//		verletStep2Kernel.setArg(4,particles->getOldAccelerationBuffer());
-		//		verletStep2Kernel.setArg(5,parameterBuffer);
 
 		updateOffsetsKernel.setArg(0, particles->getOffsetBuffer());
 		updateOffsetsKernel.setArg(1, particles->getPositionBuffer());

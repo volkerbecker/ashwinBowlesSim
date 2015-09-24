@@ -9,25 +9,45 @@
 #include <cmath>
 #include <iostream>
 #include <CL/cl.hpp>
+#include <vector>
 
 
 
 ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL context to connect particle data to gpu
 		const cl::CommandQueue &_queue,
-		const int & particleNumber, ///< Number of particles
-		const float & radius, ///< radius of the particles
-		const float & mass, ///< particles mass
-		const float & initialdistance ///< distance of initial particles
-		) : context(clContext),queue(_queue){
-	this->_size=particleNumber;
-	this->_radius=radius;
-	this->_mass=mass;
+		const Parameters &paramters,
+		const HostParameters & hostParameters
+	) : context(clContext),queue(_queue){
+	this->_size=paramters.numberOfParticles;
+	this->_radius=paramters.radius;
+	this->_mass=paramters.mass;
 
 	// initialize particles
-	createParticleString(initialdistance);
+	position=vector<cl_float2>(size(),(cl_float2){0,0});
+	velocity=vector<cl_float2>(size(),(cl_float2){0,0});
+	acceleration=vector<cl_float2>(size(),(cl_float2){0,0});
+	offset=vector<cl_int>(size(),0);
+	offsetfreepositions=vector<cl_float2>(size(),(cl_float2){0,0});;
+
+	switch (hostParameters.initialConfig) {
+	case PCHAIN:
+		createParticleString(0);
+		break;
+	case PDENSEST:
+		createDensestState(paramters.upperWall - paramters.lowerWall,
+					(double) paramters.rightWall
+						+ (double) paramters.rightWallOffset);
+		break;
+	case PLOOSEST:
+		cout << "create the loosest inital state is not implemented yet \n";
+		exit(EXIT_FAILURE);
+	default:
+		cerr << "No valid initial configuration was choosen \n";
+		exit(EXIT_FAILURE);
+	}
 
 	// initialize offsert free buffer
-	offsetfreepositions.resize(size());
+
 
 	// create opencl Buffers
 	offsetBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
@@ -38,8 +58,6 @@ ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL contex
 			sizeof(cl_float2) * velocity.size(), velocity.data());
 	accelerationBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 			sizeof(cl_float2) * acceleration.size(),acceleration.data());
-	oldAccelerationBuffer =cl::Buffer(context,CL_MEM_READ_WRITE,sizeof(cl_float2)*size());
-	//queue.enqueueFillBuffer(oldAccelerationBuffer,(cl_float2){0,0},0,sizeof(cl_float2));
 }
 
 
@@ -49,8 +67,8 @@ ParticleSystem::~ParticleSystem() {
 
 
 void ParticleSystem::createDensestState(
-		float wallDistance, ///< the distance of the vertical walls
-		float rightWall) {///< the right wall
+		const double & wallDistance, ///< the distance of the vertical walls
+		const double & rightWall) {///< the right wall
 
 	double phi=acos(wallDistance/2/radius()-1);
 	double dx=sin(phi)*2*radius();
@@ -64,17 +82,12 @@ void ParticleSystem::createDensestState(
 		sign*=-1;
 		tmpPosition-=dx;
 	}
-	queue.enqueueWriteBuffer(positionBuffer,CL_TRUE,0,sizeof(cl_float2)*size(),position.data());
-	queue.enqueueWriteBuffer(offsetBuffer,CL_TRUE,0,sizeof(cl_int)*size(),offset.data());
 }
 
 void ParticleSystem::createParticleString(const float & initialDistance) {
 
 	//resize the vectors
-	position.resize(size());
-	velocity.resize(size());
-	acceleration.resize(size());
-	offset.resize(size());
+
 
 	int tmpOffset=0;
 	float tmpPositionx=0+radius();
@@ -82,10 +95,7 @@ void ParticleSystem::createParticleString(const float & initialDistance) {
 	for(uint i=0;i<size();++i) {
 		offset[i]=tmpOffset;
 		position[i].s[0]=tmpPositionx;
-		position[i].s[1]=0*(drand48()*2-2);;  // y_i=0
-		velocity[i].s[0]=0.1*(drand48()*2-2);
-		velocity[i].s[1]=0.1*(drand48()*2-2);
-		acceleration[i].s[0]=acceleration[i].s[1]=0; //a=0
+		position[i].s[1]=0*(drand48()*2-2);  // y_i=0
 		tmpPositionx+=deltaX;
 		tmpOffset+=trunc(tmpPositionx);
 		tmpPositionx-=trunc(tmpPositionx);

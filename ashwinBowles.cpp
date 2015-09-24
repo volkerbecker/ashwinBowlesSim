@@ -22,83 +22,74 @@
 int main(void) {
 	ofstream energyStream("energy.dat");
 
+
+
 	Parameters kernelHostParameters;
 	HostParameters hostParameters;
+	Visualizer *visualizer=nullptr;
 
-
+	//read the paramter file
 	parseConfigurationFile("asgconf.icf",hostParameters,kernelHostParameters);
-	exit(0);
+	//todo consitency check
 
-	kernelHostParameters.numberOfParticles=10240;
-	kernelHostParameters.mass=1;
-	kernelHostParameters.radius=0.5;
-	kernelHostParameters.diameter=kernelHostParameters.radius*2;
-	kernelHostParameters.timestep=0.001;
-	kernelHostParameters.timestepSq=kernelHostParameters.timestep*kernelHostParameters.timestep;
-	kernelHostParameters.springConstant=4000;
-	kernelHostParameters.damping=kernelHostParameters.springConstant*0.001;
-	kernelHostParameters.inverseMass=1/kernelHostParameters.mass;
-	kernelHostParameters.leftWall=0;
-	kernelHostParameters.rightWall=0;
-	kernelHostParameters.upperWall=0.75;
-	kernelHostParameters.lowerWall=-0.75;
-	kernelHostParameters.leftWallofset=0;
-	kernelHostParameters.rightWallOffset=kernelHostParameters.numberOfParticles*(1+0.001)+1;
-	kernelHostParameters.stampAcceleration=5*kernelHostParameters.inverseMass;
-	kernelHostParameters.jamming=true;
-	kernelHostParameters.viskosity=0.01;
-	kernelHostParameters.tappingAmplitude=1;
+	//create visualization objetc if needed
+	if (hostParameters.visualization) {
+		visualizer = new Visualizer(hostParameters.vboxX, hostParameters.vboxY);
+	}
 
-	puts("Hello World!!!");
+	AshwinBowlesSystem simulation(kernelHostParameters,hostParameters);
 
-	double wallDistance = kernelHostParameters.upperWall - kernelHostParameters.lowerWall;
-	cl_float & radius = kernelHostParameters.radius;
-	double phi = acos(wallDistance / 2 / radius - 1);
-	double dx = sin(phi) * 2 * radius;
-	double length = kernelHostParameters.numberOfParticles * 0.5 * dx
-			+ (kernelHostParameters.numberOfParticles * 0.5 - 1) * kernelHostParameters.diameter
-			+ 2 * radius;
-	double leftwallPosition = (double) kernelHostParameters.rightWallOffset
-			+ (double) kernelHostParameters.rightWall - length;
-	kernelHostParameters.leftWallofset = (int) leftwallPosition;
-	cout << "left Wall:" << leftwallPosition << endl;
-	kernelHostParameters.leftWall = leftwallPosition - kernelHostParameters.leftWallofset;
+	if(hostParameters.visualization) {
+		simulation.updateOffsetFreeData(hostParameters.vLineSize);
+		visualizer->initializeSystem(
+				simulation.getPrtToOffsetFreePositions(),
+				kernelHostParameters.numberOfParticles,
+				kernelHostParameters.radius,
+				hostParameters.vLineSize,hostParameters.vLineSize,0,-hostParameters.vLineSize+kernelHostParameters.diameter,10);
+				visualizer->updateimage();}
 
-
-	Visualizer visualizer(800,800);
-	AshwinBowlesSystem simulation(kernelHostParameters,0.001,150,1.5);
-	//simulation.upDateHostMemory();
-
-	simulation.updateOffsetFreeData(150);
-	cout << (*(simulation.getPrtToOffsetFreePositions())) << endl;;
-
-
-	visualizer.initializeSystem(
-			simulation.getPrtToOffsetFreePositions(),
-			kernelHostParameters.numberOfParticles,
-			kernelHostParameters.radius,
-			150,150,0,-150+kernelHostParameters.diameter,10);
-	visualizer.updateimage();
-	std:this_thread::sleep_for(std::chrono::seconds(5));
-
-	double Ekin,Epot;
-	for(int i=0;i<40000000;++i) {
+	// the main loop todo integrate it in simulation class if possible
+	double Ekin,Epot; //kinetic an potential energy
+	double time;
+	int tapNumber=0; // counter which counts the performed taps
+	int i=0; //number of the timestep
+	while(tapNumber < hostParameters.numberOfTaps) {
 		simulation.enqueueTimeStep();
-		if(i%10000==0) {
-			simulation.enqueOffestupdate();
-			simulation.updateOffsetFreeData(150);
-			visualizer.updateimage();
+		//check tapping criteroin
+		if(i%hostParameters.tappingCheck==0) {
+			simulation.upDateHostMemory();
+			simulation.getEnergy(Ekin,Epot);
+			if (Ekin < hostParameters.tapThreshold) {
+				//todo save tap data
+				++tapNumber;
+				simulation.velocityPulse((cl_float2 ) {hostParameters.tappingAmplitudeX,hostParameters.tappingAmplitudeY});
+			}
+		}
+		//do visualization
+		if(i%hostParameters.visualizerIntervall==0 && hostParameters.visualization) {
+			simulation.updateOffsetFreeData(hostParameters.vLineSize);
+			visualizer->updateimage();
+		}
+		if(i%hostParameters.snapshotIntervall==0) {
+			//todo save system state
+			simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin,Epot);
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 			energyStream << i << "\t" << Ekin << "\t" << Epot << "\t" << Ekin+Epot << "\n";
-		//	std:this_thread::sleep_for(std::chrono::milliseconds(50));
-			if(Ekin<1e-3) {
-					simulation.velocityPulse((cl_float2){0,10});
-						}
-			}
 		}
-	visualizer.close();
+		if(i%10000==0) {
+			simulation.updateOffsetFreeData(hostParameters.vLineSize);
+			visualizer->updateimage();
+			simulation.getEnergy(Ekin,Epot);
+			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
+		}
+		if(i%hostParameters.offSetupdate==0) {
+			simulation.enqueOffestupdate();
+		}
+		++i;
+	}
+	visualizer->close();
 
-
+	if(visualizer != nullptr) delete visualizer;
 	return EXIT_SUCCESS;
 }

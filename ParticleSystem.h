@@ -11,6 +11,7 @@
 #include <CL/cl.hpp>
 #include <iostream>
 #include <climits>
+#include "Paramters.h"
 
 using namespace std;
 
@@ -21,11 +22,8 @@ public:
 	ParticleSystem(
 			const cl::Context & Context ,  ///< openCL context to connect particle data to gpu
 			const cl::CommandQueue & queue, ///< openCL Command queue
-			const int & particleNumber, ///< Number of particles
-			const float & radius=0.5, ///< radius of the particles
-			const float & mass=1, ///< particles mass
-			const float & initialdistance=0.1 ///< initial distance of the particles
-			);
+			const Parameters &parameters, ///< system parameters relevant for kernel and host
+			const HostParameters &HostParameters); ///< system parameters relevant for host only
 	~ParticleSystem();
 
 	/// get or set the system size
@@ -103,8 +101,8 @@ public:
 
 	/// sets the system to the densest possible state
 	void createDensestState(
-			float wallDistance, ///< the distance of the vertical walls
-			float rightWall); ///< the right wall
+			const double & wallDistance, ///< the distance of the vertical walls
+			const double & rightWall); ///< the right wall
 
 	void setRandomVelocity(const cl_float2 &Amplitude);
 

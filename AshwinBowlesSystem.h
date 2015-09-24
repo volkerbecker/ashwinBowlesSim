@@ -19,10 +19,9 @@ public:
 	AshwinBowlesSystem();
 	///
 	AshwinBowlesSystem(
-			const Parameters &parameters, ///< global System Parameters
-			const float &initialdistance, ///< distance of particles at t=0
-			const float &initialLength, ///< length of the box
-			const float &initialHight); ///< height of the box
+			const Parameters &parameters, ///< global System Parameters relevant for host and kernels
+			const HostParameters & hostparamters ///< Parameters relevant for the host
+			);
 	~AshwinBowlesSystem();
 
 	/// add a timestep to the openCL  Command queue
@@ -41,7 +40,6 @@ public:
 	///uodate the host meory
 	void upDateHostMemory() {
 		particles->getParticleDataFromDevice();
-		walls->getDataFromDevice();
 	}
 
 	/// update the offset free postion data
@@ -116,14 +114,14 @@ protected:
 	cl::Buffer timeBuffer;
 
 	ParticleSystem *particles;
-	Walls *walls;
+
 
 	Parameters parameter;
 
 private:
 	void initializeOpenCL();
 	cl::Program loadCLSource(const char *, const cl::Context &);
-	void setup(const Parameters& parameters, const float& initialdistance);
+	void setup(const Parameters& parameters, const HostParameters &hostParameters);
 
 	cl::NDRange globalp;
 	cl::NDRange localp; //todo optmiale wgsize finden

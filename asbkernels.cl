@@ -47,10 +47,10 @@ inline float2 calcAcceleration(
 }
 
 __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
-	__global float2 *acceleration,__constant struct Parameters* paras){
-	int id=get_global_id(0);
-		velocity[id]+=0.5*acceleration[id]*paras->timestep;
-		position[id]+=velocity[id]*paras->timestep;
+		__global float2 *acceleration, __constant struct Parameters* paras) {
+	int id = get_global_id(0);
+	velocity[id] += 0.5f * acceleration[id] * paras->timestep;
+	position[id] += velocity[id] * paras->timestep;
 }
 
 
@@ -127,7 +127,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 			acc.x += force * paras->inverseMass;
 		}
 	}
-	if (id == 0 && paras->jamming) {
+	if (id == 0) {
 		acc.x += paras->stampAcceleration;
 	}
 		acc-=paras->viskosity*velocity[id]*paras->inverseMass;

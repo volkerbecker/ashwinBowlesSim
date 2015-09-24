@@ -9,12 +9,13 @@
 #include <iostream>
 #include "fstream"
 #include <string>
+#include <climits>
 
 using namespace std;
 
 
 void parseConfigurationFile(const string &filename,HostParameters &hostParamters ///< comtains parameters only relevant for the host
-		,Parameters khParameters) {///< contain parameters relevant for the host and the kernels
+		,Parameters &khParameters) {///< contain parameters relevant for the host and the kernels
 	ifstream infile;
 	infile.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
 	try {
@@ -26,8 +27,8 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 			if(keyword[0]=='#') getline(infile,keyword); //ignore comment
 			else
 			{
-				cout << keyword << endl;
-				evaluateKeyWord(infile,keyword,hostParamters,khParameters);
+				if(!infile.fail())
+					evaluateKeyWord(infile,keyword,hostParamters,khParameters);
 			}
 
 		}
@@ -35,40 +36,113 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	} catch (ifstream::failure &e) {
 		cerr << "Error during read configuration file \n" << e.what() << endl;
 	}
+	khParameters.damping=khParameters.damping*khParameters.springConstant;
+	khParameters.stampAcceleration*=khParameters.inverseMass;
 
 }
 
 void evaluateKeyWord(ifstream &infile ///< stream with parameter file
-		,const string keyword, ///< keyword
-		HostParameters &hostParamters,
-		Parameters khParamters) {
-	if(keyword == "PNUMBER"){
-		infile >> khParamters.numberOfParticles;
+		, string keyword, ///< keyword
+		HostParameters &hostParamters, Parameters &khParamters) {
+	infile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	try {
+		if (keyword == "PNUMBER") {
+			infile >> khParamters.numberOfParticles;
+		} else if (keyword == "PMASS") {
+			infile >> khParamters.mass;
+			khParamters.inverseMass=1.0f/khParamters.mass;
+		} else if (keyword == "PRADIUS") {
+			infile >> khParamters.radius;
+			khParamters.diameter = 2 * khParamters.radius;
+		} else if (keyword == "TIMESTEP") {
+			infile >> khParamters.timestep;
+			khParamters.timestepSq = khParamters.timestep
+					* khParamters.timestep;
+		} else if (keyword == "STARTTIME") {
+			infile >> hostParamters.startTime;
+		} else if (keyword == "SPRINGCONST") {
+			infile >> khParamters.springConstant;
+		} else if (keyword == "NORMALDAMPING") {
+			infile >> khParamters.damping;
+		} else if (keyword == "VISKOSITY") {
+			infile >> khParamters.viskosity;
+		}
+		else if (keyword == "SYSTEMSIZE") {
+			double width, hight;
+			infile >> width;
+			infile >> hight;
+			khParamters.leftWallofset = 0;
+			khParamters.leftWall=0;
+			khParamters.rightWallOffset = (int) width;
+			khParamters.rightWall=width - (int)width;
+			khParamters.upperWall = hight / 2;
+			khParamters.lowerWall = -khParamters.upperWall;
+		} else if (keyword == "KRITERION") {
+			infile >> keyword;
+			if (keyword == "ENERGY")
+				hostParamters.tappingType = ENERGY;
+			else {
+				cout << "tapping criterion " << keyword << "not supported \n";
+				exit(EXIT_FAILURE);
+			}
+			infile >> hostParamters.tapThreshold;
+			infile >> hostParamters.tappingCheck;
+		} else if (keyword == "TAPTYPE") {
+			infile >> keyword;
+			if (keyword == "RDELTA") {
+				infile >> khParamters.stampAcceleration;
+				infile >> hostParamters.tappingAmplitudeX;
+				infile >> hostParamters.tappingAmplitudeY;
+			} else {
+				cout << "tapping protocol " << keyword << "not supported \n";
+				exit(EXIT_FAILURE);
+			}
+		} else if (keyword == "VISUALIZER") {
+			infile >> hostParamters.visualization;
+		} else if (keyword == "VBOXSIZE") {
+			infile >> hostParamters.vboxX;
+			infile >> hostParamters.vboxY;
+		} else if (keyword == "VLINE") {
+			infile >> hostParamters.vLineSize;
+		} else if (keyword == "EGDES") {
+			infile >> hostParamters.edges;
+		} else if (keyword == "VINTERVAL") {
+			infile >> hostParamters.visualizerIntervall;
+		} else if (keyword == "BITMAPSAVE") {
+			infile >> hostParamters.savesBitmaps;
+		} else if (keyword == "BASENAME") {
+			infile >> hostParamters.baseName;
+		} else if (keyword == "SNAP") {
+			infile >> keyword;
+			if (keyword == "INF")
+				hostParamters.snapshotIntervall = INT_MAX;
+			else
+				hostParamters.snapshotIntervall = atof(keyword.c_str());
+		} else if (keyword == "INITIAL") {
+			infile >> keyword;
+			if (keyword == "DENSEST") {
+				hostParamters.initialConfig = PDENSEST;
+			} else if (keyword == "LOOSEST") {
+				hostParamters.initialConfig = PLOOSEST;
+			} else if (keyword == "FILE") {
+				hostParamters.initialConfig = PFILE;
+			} else {
+				cerr << "Particle initialisationj type " << keyword
+						<< "not supported \n";
+				exit(0);
+			}
+		} else if(keyword == "NUMTAP") {
+			infile >> hostParamters.numberOfTaps;
+		} else if(keyword == "OFFSETUPDATE") {
+			infile >> hostParamters.offSetupdate;
+		} else {
+			cerr << "Keyword " << keyword << " is unknown" << endl;
+			exit(EXIT_FAILURE);
+		}
+	} catch (ifstream::failure &e) {
+		cerr << "Error during read configuration file \n " << e.what() << endl;
+		cerr << "Keyword: " << keyword << "\n";
+		exit(0);
 	}
-	else if(keyword == "PMASS") {
-		infile >> khParamters.mass;
-	}
-	else if(keyword == "PRADIUS") {
-		infile >> khParamters.radius;
-		khParamters.diameter=2*khParamters.radius;
-	}
-	else if(keyword == "TIMESTEP") {
-		infile >> khParamters.timestep;
-		khParamters.timestepSq=khParamters.timestep*khParamters.timestep;
-	}
-	else if(keyword == "SPRINGCONST") {
-		infile >> khParamters.springConstant;
-	}
-	else if(keyword == "NORMALDAMPING") {
-		infile >> khParamters.damping;
-	}
-	else if(keyword == "SYSTEMSIZE") {
-		double width,hight;
-		infile >> width;
-		infile >> hight;
-		khParamters.leftWallofset = 0;
-		khParamters.rightWallOffset = (int) width;
-		khParamters.upperWall=hight/2;
-		khParamters.lowerWall=-khParamters.upperWall;
-	}
+	infile.exceptions(std::ifstream::badbit);
 }

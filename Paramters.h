@@ -17,13 +17,28 @@ typedef enum {
 typedef struct HostParameters {
 	bool takeSnapShots; ///< sollen regelmaeßige snapshots gemacht werden?
 	std::string baseName; ///<basename für Ausgabedateien
+	float startTime;
 	int snapshotIntervall; ///< number of timesteps between snapshots
 	int timestepOffset; ///< wenn Simlation nicht bei t=0 anfaenft
+	int numberOfTaps;
 
 	bool visualization; ///< soll visualisiert werden
 	bool savesBitmaps; ///sollen visulisierungen als png Dateien gespeichert werden?
 	int visualizerIntervall; ///< timesteps between visualization
+	float vboxX;
+	float vboxY;
+	int vLineSize;
+	int edges;
+	asbEnum initialConfig;
+	asbEnum tapCriteroin;
+	asbEnum tappingType;
+	double tapThreshold;
+	float tappingAmplitudeX;
+	float tappingAmplitudeY;
+	int tappingCheck;
+	int offSetupdate;
 } HostParameters;
+
 #else
 	typedef int cl_int;
 	typedef float cl_float;
@@ -50,7 +65,6 @@ typedef struct Parameters {
     cl_float stampAcceleration;
     cl_bool jamming;
     cl_float viskosity;
-    cl_float tappingAmplitude;
 } Parameters;
 
 #endif
