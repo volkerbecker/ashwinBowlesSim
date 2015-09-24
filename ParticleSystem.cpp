@@ -133,6 +133,8 @@ void ParticleSystem::setRandomVelocity(const cl_float2 &Amplitude) {
 	;
 }
 
+
+
 ostream& operator <<(ostream& os, ParticleSystem & ps) {
 	ps.getParticleDataFromDevice();
 	for (int i = 0; i < ps.size(); i++) {

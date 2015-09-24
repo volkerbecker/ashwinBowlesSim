@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Paramters.h"
 #include <fstream>
+#include <vector>
 
 #define OPENCL_PROGRAM_NAME "asbkernels.cl"
 
@@ -142,6 +143,39 @@ void AshwinBowlesSystem::enqueueTimeStep() {
 			std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 			exit(EXIT_FAILURE);
 	}
+}
+
+bool AshwinBowlesSystem::isJammed(
+			int &exitedBonds, ///< \return number of exited bonds
+			std::vector<bool> stateVector ///< \return the state vector
+	) {
+	stateVector.clear();
+	stateVector.resize(particles->size());
+	exitedBonds=0;
+	bool isJammed=true;
+	const vector<cl_float2> & pos = particles->getPositions();
+	for(int i=1;i<pos.size();++i) {
+		const double &y1=pos[i].s[1];
+		const double &y2=pos[i-1].s[1];
+		if( parameter.upperWall-y1 > parameter.radius
+				&& y1-parameter.lowerWall > parameter.radius) {
+			isJammed=false;
+			break;
+		}
+		if(fabs(y2-y1)>0.05*parameter.radius) {
+			stateVector[i-1]=false;
+		} else {
+			stateVector[i-1]=true;
+			exitedBonds++;
+			if(i>0) {
+				if(stateVector[i]) {
+					isJammed=false;
+					break;
+				}
+			}
+		}
+	}
+	return isJammed;
 }
 
 cl::Program AshwinBowlesSystem::loadCLSource(const char *filename, const cl::Context &context) {

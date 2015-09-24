@@ -53,13 +53,23 @@ int main(void) {
 	double time;
 	int tapNumber=0; // counter which counts the performed taps
 	int i=0; //number of the timestep
+	vector<bool> state;
+	int exitedBonds;
+
 	while(tapNumber < hostParameters.numberOfTaps) {
 		simulation.enqueueTimeStep();
 		//check tapping criteroin
 		if(i%hostParameters.tappingCheck==0) {
 			simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin,Epot);
+
 			if (Ekin < hostParameters.tapThreshold) {
+				if(simulation.isJammed(exitedBonds,state)) {
+								cout << "state is jammed, exited bonds: " << exitedBonds;
+							} else {
+								cout << "state is not jammed";
+							}
+				cout << ", volume " << simulation.volume() << endl;
 				//todo save tap data
 				++tapNumber;
 				simulation.velocityPulse((cl_float2 ) {hostParameters.tappingAmplitudeX,hostParameters.tappingAmplitudeY});
@@ -76,12 +86,6 @@ int main(void) {
 			simulation.getEnergy(Ekin,Epot);
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 			energyStream << i << "\t" << Ekin << "\t" << Epot << "\t" << Ekin+Epot << "\n";
-		}
-		if(i%10000==0) {
-			simulation.updateOffsetFreeData(hostParameters.vLineSize);
-			visualizer->updateimage();
-			simulation.getEnergy(Ekin,Epot);
-			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 		}
 		if(i%hostParameters.offSetupdate==0) {
 			simulation.enqueOffestupdate();

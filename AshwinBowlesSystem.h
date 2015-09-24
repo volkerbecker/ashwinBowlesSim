@@ -86,6 +86,24 @@ public:
 		}
 	}
 
+	/// test wther the particle system is jammed and returns
+		/// the number of exited Bonds and the state vector
+		/// 1 is an exited bond, 0 is an relaxed bond
+		/// \returns true if the state fullfills the jamming condtion
+	bool isJammed(
+			int &exitedBonds, ///< \return number of exited bonds
+			std::vector<bool> stateVector ///< \return the state vector
+	);
+
+	//returns the physical volume fraction icluding overlap effects
+	// make sure that the particle data is up to date
+	double volume() {
+		double length=particles->getPosition(particles->size()-1).s[0]-
+				particles->getPosition(0).s[0]-particles->radius()*2;
+		return length*particles->radius()*2;
+	}
+
+
 	void velocityPulse(const cl_float2 &amplitude) {
 		particles->setRandomVelocity(amplitude);
 	}

@@ -106,6 +106,7 @@ public:
 
 	void setRandomVelocity(const cl_float2 &Amplitude);
 
+
 	///ostream operator
 	friend ostream& operator << (ostream& os, ParticleSystem & ps);
 
