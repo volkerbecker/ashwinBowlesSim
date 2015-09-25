@@ -178,6 +178,15 @@ bool AshwinBowlesSystem::isJammed(
 	return isJammed;
 }
 
+void AshwinBowlesSystem::saveState(const string &filename,const double &time,const int &number) {
+	ofstream saveFile(filename);
+	saveFile.precision(20);
+	saveFile << time << "\t" << number << endl;
+	saveFile.precision(20);
+	saveFile << *particles;
+	saveFile.close();
+}
+
 cl::Program AshwinBowlesSystem::loadCLSource(const char *filename, const cl::Context &context) {
 	try {
 		std::ifstream sourceFile(filename); //open file

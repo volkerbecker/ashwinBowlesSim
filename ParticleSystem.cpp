@@ -39,8 +39,10 @@ ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL contex
 						+ (double) paramters.rightWallOffset);
 		break;
 	case PLOOSEST:
-		cout << "create the loosest inital state is not implemented yet \n";
-		exit(EXIT_FAILURE);
+		createLoosetState(paramters.upperWall - paramters.lowerWall,
+							(double) paramters.rightWall
+								+ (double) paramters.rightWallOffset);
+		break;
 	default:
 		cerr << "No valid initial configuration was choosen \n";
 		exit(EXIT_FAILURE);
@@ -83,6 +85,29 @@ void ParticleSystem::createDensestState(
 		tmpPosition-=dx;
 	}
 }
+
+void ParticleSystem::createLoosetState(
+		const double & wallDistance, ///< the distance of the vertical walls
+		const double & rightWall) {///< the right wall
+
+	double phi=acos(wallDistance/2/radius()-1);
+	double dx=sin(phi)*2*radius();
+	double tmpPosition=rightWall-radius();
+	double yposition=wallDistance/2-radius();
+	int sign=1;
+	for(int i=size()-1;i>=1;i-=2)  {
+		offset[i]=(int)tmpPosition;
+		position[i].s[0]=(float)(tmpPosition-offset[i]);
+		position[i].s[1]=(float)(sign*yposition);
+		tmpPosition-=radius()*2;
+		offset[i-1]=(int)tmpPosition;
+		position[i-1].s[0]=(float)(tmpPosition-offset[i-1]);
+		position[i-1].s[1]=(float)(sign*yposition);
+		sign*=-1;
+		tmpPosition-=dx;
+	}
+}
+
 
 void ParticleSystem::createParticleString(const float & initialDistance) {
 

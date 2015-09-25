@@ -19,7 +19,7 @@
 #include <fstream>
 #include "Setup.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
 	ofstream energyStream("energy.dat");
 
 
@@ -32,7 +32,7 @@ int main(void) {
 
 
 	//read the paramter file
-	parseConfigurationFile("asgconf.icf",hostParameters,kernelHostParameters);
+	parseConfigurationFile(argv[1],hostParameters,kernelHostParameters);
 	//todo consitency check
 
 	string tapStateFileName=hostParameters.baseName + ".tap.gstat";
@@ -71,17 +71,23 @@ int main(void) {
 			simulation.getEnergy(Ekin,Epot);
 
 			if (Ekin < hostParameters.tapThreshold) {
-				if(simulation.isJammed(exitedBonds,state)) {
-								cout << "state is jammed, exited bonds: " << exitedBonds;
-							} else {
-								cout << "state is not jammed";
-							}
+				if (simulation.isJammed(exitedBonds, state)) {
+					cout << "state is jammed, exited bonds: " << exitedBonds;
+				} else {
+					cout << "state is not jammed";
+				}
 				cout << ", volume " << simulation.volume() << endl;
 				//todo save tap data
 				tappSave.precision(20);
-				tappSave << tapNumber << "\t" << Epot << "\t" << Ekin << "\t" << exitedBonds << "\t" << simulation.volume() << endl;
+				tappSave << tapNumber << "\t" << Epot << "\t" << Ekin << "\t"
+						<< exitedBonds << "\t" << simulation.volume() << endl;
 				++tapNumber;
-				simulation.velocityPulse((cl_float2 ) {hostParameters.tappingAmplitudeX,hostParameters.tappingAmplitudeY});
+				simulation.velocityPulse(
+						(cl_float2 ) { hostParameters.tappingAmplitudeX,
+										hostParameters.tappingAmplitudeY });
+				char fname[25];
+				sprintf(fname,"%s.tap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
+				simulation.saveState(fname,i*kernelHostParameters.timestep,tapNumber);
 			}
 		}
 		//do visualization
