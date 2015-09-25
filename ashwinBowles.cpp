@@ -28,9 +28,16 @@ int main(void) {
 	HostParameters hostParameters;
 	Visualizer *visualizer=nullptr;
 
+
+
+
 	//read the paramter file
 	parseConfigurationFile("asgconf.icf",hostParameters,kernelHostParameters);
 	//todo consitency check
+
+	string tapStateFileName=hostParameters.baseName + ".tap.gstat";
+	cout << hostParameters.baseName << endl;
+	ofstream tappSave(tapStateFileName);
 
 	//create visualization objetc if needed
 	if (hostParameters.visualization) {
@@ -71,6 +78,8 @@ int main(void) {
 							}
 				cout << ", volume " << simulation.volume() << endl;
 				//todo save tap data
+				tappSave.precision(20);
+				tappSave << tapNumber << "\t" << Epot << "\t" << Ekin << "\t" << exitedBonds << "\t" << simulation.volume() << endl;
 				++tapNumber;
 				simulation.velocityPulse((cl_float2 ) {hostParameters.tappingAmplitudeX,hostParameters.tappingAmplitudeY});
 			}
@@ -95,5 +104,6 @@ int main(void) {
 	visualizer->close();
 
 	if(visualizer != nullptr) delete visualizer;
+	tappSave.close();
 	return EXIT_SUCCESS;
 }
