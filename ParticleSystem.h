@@ -104,6 +104,10 @@ public:
 			const double & wallDistance, ///< the distance of the vertical walls
 			const double & rightWall); ///< the right wall
 
+	void createLoosetState(
+				const double & wallDistance, ///< the distance of the vertical walls
+				const double & rightWall); ///< the right wall
+
 	void setRandomVelocity(const cl_float2 &Amplitude);
 
 

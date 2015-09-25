@@ -108,6 +108,9 @@ public:
 		particles->setRandomVelocity(amplitude);
 	}
 
+	void saveState(const string &filename,const double &time,const int &number);
+
+
 protected:
 	std::vector<cl::Platform> plattforms;
 	std::vector<cl::Device> devices;
