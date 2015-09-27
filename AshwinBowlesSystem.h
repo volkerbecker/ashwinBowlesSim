@@ -92,7 +92,7 @@ public:
 		/// \returns true if the state fullfills the jamming condtion
 	bool isJammed(
 			int &exitedBonds, ///< \return number of exited bonds
-			std::vector<bool> stateVector ///< \return the state vector
+			std::vector<bool> &stateVector ///< \return the state vector
 	);
 
 	//returns the physical volume fraction icluding overlap effects
@@ -106,6 +106,10 @@ public:
 
 	void velocityPulse(const cl_float2 &amplitude) {
 		particles->setRandomVelocity(amplitude);
+	}
+
+	void hammerPulse(const cl_float2 &amplitude) {
+			particles->setVelocity(amplitude);
 	}
 
 	void saveState(const string &filename,const double &time,const int &number);

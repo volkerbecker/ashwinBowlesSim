@@ -20,8 +20,6 @@
 #include "Setup.h"
 
 int main(int argc, char *argv[]) {
-	ofstream energyStream("energy.dat");
-
 
 
 	Parameters kernelHostParameters;
@@ -38,6 +36,7 @@ int main(int argc, char *argv[]) {
 	string tapStateFileName=hostParameters.baseName + ".tap.gstat";
 	cout << hostParameters.baseName << endl;
 	ofstream tappSave(tapStateFileName);
+	ofstream stateSave(hostParameters.baseName + ".tap.state");
 
 	//create visualization objetc if needed
 	if (hostParameters.visualization) {
@@ -56,7 +55,7 @@ int main(int argc, char *argv[]) {
 				visualizer->updateimage();}
 
 	// the main loop todo integrate it in simulation class if possible
-	double Ekin,Epot; //kinetic an potential energy
+
 	double time;
 	int tapNumber=0; // counter which counts the performed taps
 	int i=0; //number of the timestep
@@ -66,7 +65,9 @@ int main(int argc, char *argv[]) {
 	while(tapNumber < hostParameters.numberOfTaps) {
 		simulation.enqueueTimeStep();
 		//check tapping criteroin
+
 		if(i%hostParameters.tappingCheck==0) {
+			double Ekin,Epot; //kinetic an potential energy
 			simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin,Epot);
 
@@ -82,12 +83,35 @@ int main(int argc, char *argv[]) {
 				tappSave << tapNumber << "\t" << Epot << "\t" << Ekin << "\t"
 						<< exitedBonds << "\t" << simulation.volume() << endl;
 				++tapNumber;
-				simulation.velocityPulse(
-						(cl_float2 ) { hostParameters.tappingAmplitudeX,
-										hostParameters.tappingAmplitudeY });
+
+				//do the next excitation
+				switch (hostParameters.tappingType) {
+				case RDELTA:
+					simulation.velocityPulse(
+							(cl_float2 ) {
+											hostParameters.tappingAmplitudeX,
+											hostParameters.tappingAmplitudeY });
+					break;
+
+				case HAMMER:
+					simulation.hammerPulse((cl_float2 ) {
+						hostParameters.tappingAmplitudeX,
+						hostParameters.tappingAmplitudeY});
+					hostParameters.tappingAmplitudeX*=-1;
+					hostParameters.tappingAmplitudeY*=-1;
+					break;
+
+				default:
+					break;
+				}
 				char fname[25];
 				sprintf(fname,"%s.tap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
 				simulation.saveState(fname,i*kernelHostParameters.timestep,tapNumber);
+				sprintf(fname,"%s.tap.%05d.state",(const char*)hostParameters.baseName.c_str(),tapNumber);
+				for(int ii=0;ii<state.size();++ii) {
+					stateSave << state[ii];
+				}
+				stateSave << endl;
 			}
 		}
 		//do visualization
@@ -97,10 +121,13 @@ int main(int argc, char *argv[]) {
 		}
 		if(i%hostParameters.snapshotIntervall==0) {
 			//todo save system state
+			double Ekin,Epot; //kinetic an potential energy
 			simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin,Epot);
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
-			energyStream << i << "\t" << Ekin << "\t" << Epot << "\t" << Ekin+Epot << "\n";
+			char fname[25];
+			sprintf(fname,"%s.snap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
+			simulation.saveState(fname,i*kernelHostParameters.timestep,tapNumber);
 		}
 		if(i%hostParameters.offSetupdate==0) {
 			simulation.enqueOffestupdate();

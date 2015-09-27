@@ -147,7 +147,7 @@ void AshwinBowlesSystem::enqueueTimeStep() {
 
 bool AshwinBowlesSystem::isJammed(
 			int &exitedBonds, ///< \return number of exited bonds
-			std::vector<bool> stateVector ///< \return the state vector
+			std::vector<bool> &stateVector ///< \return the state vector
 	) {
 	stateVector.clear();
 	stateVector.resize(particles->size());
@@ -201,3 +201,5 @@ cl::Program AshwinBowlesSystem::loadCLSource(const char *filename, const cl::Con
 		exit(EXIT_FAILURE);
 	}
 }
+
+

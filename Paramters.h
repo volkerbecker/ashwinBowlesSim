@@ -10,7 +10,7 @@
 
 typedef enum {
 	PCHAIN,PDENSEST,PLOOSEST,PFILE, ///< particle initialisation types
-	RANDOMDELTA, ///< protocol type
+	RDELTA,HAMMER, ///< protocol type
 	ENERGY ///< taping kriterion
 } asbEnum;
 

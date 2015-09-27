@@ -158,6 +158,16 @@ void ParticleSystem::setRandomVelocity(const cl_float2 &Amplitude) {
 	;
 }
 
+void ParticleSystem::setVelocity(const cl_float2 &Amplitude) {
+	for (uint i = 0; i < size(); ++i) {
+		velocity[i].s[0] = Amplitude.s[0];
+		velocity[i].s[1] = Amplitude.s[1];
+	}
+	queue.enqueueWriteBuffer(velocityBuffer, CL_FALSE, 0,
+			size() * sizeof(cl_float2), velocity.data());
+	;
+}
+
 
 
 ostream& operator <<(ostream& os, ParticleSystem & ps) {
