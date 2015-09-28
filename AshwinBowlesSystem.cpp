@@ -157,8 +157,8 @@ bool AshwinBowlesSystem::isJammed(
 	for(int i=1;i<pos.size();++i) {
 		const double &y1=pos[i].s[1];
 		const double &y2=pos[i-1].s[1];
-		if( parameter.upperWall-y1 > parameter.radius
-				&& y1-parameter.lowerWall > parameter.radius) {
+		if( parameter.upperWall-y1 > parameter.radius*(1+0.01)
+				&& y1-parameter.lowerWall > parameter.radius*(1+0.01)) {
 			isJammed=false;
 			break;
 		}
@@ -167,8 +167,8 @@ bool AshwinBowlesSystem::isJammed(
 		} else {
 			stateVector[i-1]=true;
 			exitedBonds++;
-			if(i>0) {
-				if(stateVector[i]) {
+			if(i>1) {
+				if(stateVector[i-2]) {
 					isJammed=false;
 					break;
 				}
