@@ -20,7 +20,7 @@ public:
 	///
 	AshwinBowlesSystem(
 			const Parameters &parameters, ///< global System Parameters relevant for host and kernels
-			const HostParameters & hostparamters ///< Parameters relevant for the host
+			const HostParameters & hostparamters ///< Parameters relevant for the host#
 			);
 	~AshwinBowlesSystem();
 
@@ -112,7 +112,7 @@ public:
 			particles->setVelocity(amplitude);
 	}
 
-	void saveState(const string &filename,const double &time,const int &number);
+	void saveState(const string &filename,const int &timeStep,const int &number);
 
 
 protected:

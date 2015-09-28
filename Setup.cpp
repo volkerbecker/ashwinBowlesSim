@@ -18,6 +18,7 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 		,Parameters &khParameters) {///< contain parameters relevant for the host and the kernels
 	ifstream infile;
 	infile.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
+	hostParamters.saveDatails=false;
 	try {
 		infile.open(filename, std::ifstream::in);
 		infile.exceptions ( std::ifstream::badbit );
@@ -38,7 +39,6 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	}
 	khParameters.damping=khParameters.damping*khParameters.springConstant;
 	khParameters.stampAcceleration*=khParameters.inverseMass;
-
 }
 
 void evaluateKeyWord(ifstream &infile ///< stream with parameter file
@@ -58,8 +58,6 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			infile >> khParamters.timestep;
 			khParamters.timestepSq = khParamters.timestep
 					* khParamters.timestep;
-		} else if (keyword == "STARTTIME") {
-			infile >> hostParamters.startTime;
 		} else if (keyword == "SPRINGCONST") {
 			infile >> khParamters.springConstant;
 		} else if (keyword == "NORMALDAMPING") {
@@ -82,7 +80,7 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			if (keyword == "ENERGY")
 				hostParamters.tappingType = ENERGY;
 			else {
-				cout << "tapping criterion " << keyword << "not supported \n";
+				cout << "tapping criterion " << keyword << " not supported \n";
 				exit(EXIT_FAILURE);
 			}
 			infile >> hostParamters.tapThreshold;
@@ -133,15 +131,21 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 				hostParamters.initialConfig = PLOOSEST;
 			} else if (keyword == "FILE") {
 				hostParamters.initialConfig = PFILE;
+				infile >> hostParamters.inFileName;
 			} else {
-				cerr << "Particle initialisationj type " << keyword
-						<< "not supported \n";
+				cerr << "Particle initialisation type " << keyword
+						<< " not supported \n";
 				exit(0);
 			}
 		} else if(keyword == "NUMTAP") {
 			infile >> hostParamters.numberOfTaps;
-		} else if(keyword == "OFFSETUPDATE") {
+		} else if(keyword == "TIMEOFFSET") {
+			infile >> hostParamters.startTimeStep;
+			infile >> hostParamters.startSnapNumber;
+		} else if(keyword== "OFFSETUPDATE") {
 			infile >> hostParamters.offSetupdate;
+		} else if(keyword == "SAVEDETAILS") {
+			infile >> hostParamters.saveDatails;
 		} else {
 			cerr << "Keyword " << keyword << " is unknown" << endl;
 			exit(EXIT_FAILURE);

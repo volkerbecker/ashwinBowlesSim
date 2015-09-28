@@ -178,10 +178,9 @@ bool AshwinBowlesSystem::isJammed(
 	return isJammed;
 }
 
-void AshwinBowlesSystem::saveState(const string &filename,const double &time,const int &number) {
+void AshwinBowlesSystem::saveState(const string &filename,const int &timeStep,const int &number) {
 	ofstream saveFile(filename);
-	saveFile.precision(20);
-	saveFile << time << "\t" << number << endl;
+	saveFile << timeStep << "\t" << number << endl;
 	saveFile.precision(20);
 	saveFile << *particles;
 	saveFile.close();

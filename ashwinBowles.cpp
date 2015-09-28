@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
 	// the main loop todo integrate it in simulation class if possible
 
 	double time;
-	int tapNumber=0; // counter which counts the performed taps
-	int i=0; //number of the timestep
+	int tapNumber=hostParameters.startSnapNumber; // counter which counts the performed taps
+	int i=hostParameters.startTimeStep; //number of the timestep
 	vector<bool> state;
 	int exitedBonds;
 
@@ -66,10 +66,10 @@ int main(int argc, char *argv[]) {
 		simulation.enqueueTimeStep();
 		//check tapping criteroin
 
-		if(i%hostParameters.tappingCheck==0) {
-			double Ekin,Epot; //kinetic an potential energy
+		if (i % hostParameters.tappingCheck == 0) {
+			double Ekin, Epot; //kinetic an potential energy
 			simulation.upDateHostMemory();
-			simulation.getEnergy(Ekin,Epot);
+			simulation.getEnergy(Ekin, Epot);
 
 			if (Ekin < hostParameters.tapThreshold) {
 				if (simulation.isJammed(exitedBonds, state)) {
@@ -84,6 +84,18 @@ int main(int argc, char *argv[]) {
 						<< exitedBonds << "\t" << simulation.volume() << endl;
 				++tapNumber;
 
+				char fname[128];
+				sprintf(fname, "%s.tap.%05d.pdat",
+						(const char*) hostParameters.baseName.c_str(),
+						tapNumber);
+				if(hostParameters.saveDatails)
+					simulation.saveState(fname, i, tapNumber);
+				sprintf(fname, "%s.tap.%05d.state",
+						(const char*) hostParameters.baseName.c_str(),
+						tapNumber);
+				for (int ii = 0; ii < state.size(); ++ii) {
+					stateSave << state[ii];
+				}
 				//do the next excitation
 				switch (hostParameters.tappingType) {
 				case RDELTA:
@@ -94,22 +106,15 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case HAMMER:
-					simulation.hammerPulse((cl_float2 ) {
-						hostParameters.tappingAmplitudeX,
-						hostParameters.tappingAmplitudeY});
-					hostParameters.tappingAmplitudeX*=-1;
-					hostParameters.tappingAmplitudeY*=-1;
+					simulation.hammerPulse(
+							(cl_float2 ) {
+											hostParameters.tappingAmplitudeX,
+											hostParameters.tappingAmplitudeY });
+					hostParameters.tappingAmplitudeX *= -1;
+					hostParameters.tappingAmplitudeY *= -1;
 					break;
-
 				default:
 					break;
-				}
-				char fname[25];
-				sprintf(fname,"%s.tap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
-				simulation.saveState(fname,i*kernelHostParameters.timestep,tapNumber);
-				sprintf(fname,"%s.tap.%05d.state",(const char*)hostParameters.baseName.c_str(),tapNumber);
-				for(int ii=0;ii<state.size();++ii) {
-					stateSave << state[ii];
 				}
 				stateSave << endl;
 			}
@@ -127,7 +132,7 @@ int main(int argc, char *argv[]) {
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 			char fname[25];
 			sprintf(fname,"%s.snap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
-			simulation.saveState(fname,i*kernelHostParameters.timestep,tapNumber);
+			simulation.saveState(fname,i,tapNumber);
 		}
 		if(i%hostParameters.offSetupdate==0) {
 			simulation.enqueOffestupdate();

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <CL/cl.hpp>
 #include <vector>
+#include <fstream>
 
 
 
@@ -42,6 +43,9 @@ ParticleSystem::ParticleSystem(const cl::Context & clContext, ///< openCL contex
 		createLoosetState(paramters.upperWall - paramters.lowerWall,
 							(double) paramters.rightWall
 								+ (double) paramters.rightWallOffset);
+		break;
+	case PFILE:
+		loadParticleState(hostParameters);
 		break;
 	default:
 		cerr << "No valid initial configuration was choosen \n";
@@ -166,6 +170,41 @@ void ParticleSystem::setVelocity(const cl_float2 &Amplitude) {
 	queue.enqueueWriteBuffer(velocityBuffer, CL_FALSE, 0,
 			size() * sizeof(cl_float2), velocity.data());
 	;
+}
+
+void ParticleSystem::loadParticleState(const HostParameters & hostparameters) {
+	ifstream infile(hostparameters.inFileName);
+	int stime,ssnap;
+	infile >> stime;
+	infile >> ssnap;
+	if(stime !=  hostparameters.startTimeStep || ssnap != hostparameters.startSnapNumber) {
+		cout << "warning: start time and/or snapshot number from particle file is/are not"
+				"consistent with configuration file. Ignore the warning if this is intended."
+				"\n";
+	}
+	for (int i=0;i<size();++i) {
+		double posx,posy,velx,vely,accx,accy;
+		infile >> posx;
+		infile >> posy;
+		infile >> velx;
+		infile >> vely;
+		infile >> accx;
+		infile >> accy;
+		if(infile.good()) {
+			offset[i]=(int)posx;
+			position[i].s[0]=(float)(posx-(int)posx);
+			position[i].s[1]=(float)(posy);
+			velocity[i].s[0]=velx;
+			velocity[i].s[1]=vely;
+			acceleration[i].s[0]=accx;
+			acceleration[i].s[1]=accy;
+		} else
+		{
+			cerr << "Error while reading particle Data \n";
+			exit(EXIT_FAILURE);
+		}
+	}
+	infile.close();
 }
 
 

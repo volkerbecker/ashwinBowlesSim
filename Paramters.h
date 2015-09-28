@@ -17,7 +17,9 @@ typedef enum {
 typedef struct HostParameters {
 	bool takeSnapShots; ///< sollen regelmaeßige snapshots gemacht werden?
 	std::string baseName; ///<basename für Ausgabedateien
-	float startTime;
+	std::string inFileName;
+	int startTimeStep;
+	int startSnapNumber;
 	int snapshotIntervall; ///< number of timesteps between snapshots
 	int timestepOffset; ///< wenn Simlation nicht bei t=0 anfaenft
 	int numberOfTaps;
@@ -37,6 +39,7 @@ typedef struct HostParameters {
 	float tappingAmplitudeY;
 	int tappingCheck;
 	int offSetupdate;
+	bool saveDatails;
 } HostParameters;
 
 #else

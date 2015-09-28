@@ -23,7 +23,7 @@ public:
 			const cl::Context & Context ,  ///< openCL context to connect particle data to gpu
 			const cl::CommandQueue & queue, ///< openCL Command queue
 			const Parameters &parameters, ///< system parameters relevant for kernel and host
-			const HostParameters &HostParameters); ///< system parameters relevant for host only
+		    const HostParameters &HostParameters); ///< system parameters relevant for host only
 	~ParticleSystem();
 
 	/// get or set the system size
@@ -142,6 +142,8 @@ protected:
 	void createParticleString( ///< create a string of particles allog the y axis
 			const float & initialDistance ///< distance between particles
 			);
+
+	void loadParticleState(const HostParameters &hostParameters);
 };
 
 #endif /* PARTICLESYSTEM_H_ */
