@@ -1,5 +1,5 @@
 #Globale Parameter
-  PNUMBER 1024
+  PNUMBER 102400
   PMASS 1
   PRADIUS 0.5
   TIMESTEP 0.01
