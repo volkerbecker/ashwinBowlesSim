@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 		}
 		++i;
 	}
-	visualizer->close();
+	if(hostParameters.visualization) visualizer->close();
 
 	if(visualizer != nullptr) delete visualizer;
 	tappSave.close();
