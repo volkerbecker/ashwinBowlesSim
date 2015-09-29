@@ -6,7 +6,10 @@
 // Description : Hello World in C, Ansi-style
 //============================================================================
 // ios::exceptions
+//#define USE_VISUALIZER
+#ifdef USE_VISUALIZER
 #include "Visualizer.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <CL/cl.hpp>
@@ -24,8 +27,9 @@ int main(int argc, char *argv[]) {
 
 	Parameters kernelHostParameters;
 	HostParameters hostParameters;
+#ifdef USE_VISUALIZER
 	Visualizer *visualizer=nullptr;
-
+#endif
 
 
 
@@ -38,13 +42,15 @@ int main(int argc, char *argv[]) {
 	ofstream tappSave(tapStateFileName);
 	ofstream stateSave(hostParameters.baseName + ".tap.state");
 
+#ifdef USE_VISUALIZER
 	//create visualization objetc if needed
 	if (hostParameters.visualization) {
 		visualizer = new Visualizer(hostParameters.vboxX, hostParameters.vboxY);
 	}
+#endif
 
 	AshwinBowlesSystem simulation(kernelHostParameters,hostParameters);
-
+#ifdef USE_VISUALIZER
 	if(hostParameters.visualization) {
 		simulation.updateOffsetFreeData(hostParameters.vLineSize);
 		visualizer->initializeSystem(
@@ -53,6 +59,7 @@ int main(int argc, char *argv[]) {
 				kernelHostParameters.radius,
 				hostParameters.vLineSize,hostParameters.vLineSize,0,-hostParameters.vLineSize+kernelHostParameters.diameter,10);
 				visualizer->updateimage();}
+#endif
 
 	// the main loop todo integrate it in simulation class if possible
 
@@ -119,11 +126,13 @@ int main(int argc, char *argv[]) {
 				stateSave << endl;
 			}
 		}
+#ifdef USE_VISUALIZER
 		//do visualization
 		if(i%hostParameters.visualizerIntervall==0 && hostParameters.visualization) {
 			simulation.updateOffsetFreeData(hostParameters.vLineSize);
 			visualizer->updateimage();
 		}
+#endif
 		if(i%hostParameters.snapshotIntervall==0) {
 			//todo save system state
 			double Ekin,Epot; //kinetic an potential energy
@@ -139,9 +148,10 @@ int main(int argc, char *argv[]) {
 		}
 		++i;
 	}
+#ifdef USE_VISUALIZER
 	if(hostParameters.visualization) visualizer->close();
-
 	if(visualizer != nullptr) delete visualizer;
+#endif
 	tappSave.close();
 	return EXIT_SUCCESS;
 }

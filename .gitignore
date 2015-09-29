@@ -7,6 +7,9 @@
 *.log
 *.dat
 *.d
+*.pdat
+*.state
+*.gstat
 gmon.out
 #ignore Documentation Folder (create it local using doxygen)
 documentation/*
