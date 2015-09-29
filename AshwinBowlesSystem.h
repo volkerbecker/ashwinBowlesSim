@@ -121,7 +121,7 @@ protected:
 	cl::Context context;
 	cl::CommandQueue queue;
 	cl::Program clProgram;
-	float asbTime=0;
+	float asbTime;
 
 	cl::Kernel verletStep1Kernel;  ///<Kernel that predicts the velocities and update the positions
 	/// Kernel which will calculate the interactions between particle 12 34 56 etc

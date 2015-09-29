@@ -14,7 +14,9 @@
 
 #define OPENCL_PROGRAM_NAME "asbkernels.cl"
 
-AshwinBowlesSystem::AshwinBowlesSystem() {}
+AshwinBowlesSystem::AshwinBowlesSystem() {
+	asbTime=0;
+}
 
 
 AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
@@ -22,6 +24,7 @@ AshwinBowlesSystem::AshwinBowlesSystem(const Parameters &parameters,
 
 
 	setup(parameters, hostparameters);
+	asbTime=0;
 }
 
 AshwinBowlesSystem::~AshwinBowlesSystem() {

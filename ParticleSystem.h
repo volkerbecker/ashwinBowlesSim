@@ -119,7 +119,7 @@ public:
 
 
 protected:
-	unsigned int _size=0; ///< number of particles
+	unsigned int _size; ///< number of particles
 	float _radius;
 	float _mass;
 	vector<cl_int> offset; ///< offset for the particle x-positions
