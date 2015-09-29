@@ -129,7 +129,7 @@ void AshwinBowlesSystem::initializeOpenCL() {
 		context = cl::Context(devices);
 
 		// create a command queue
-		queue = cl::CommandQueue(context, devices[0]);
+		queue = cl::CommandQueue(context, devices[1]);
 	} catch (cl::Error &error) {
 		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 		exit(EXIT_FAILURE);
