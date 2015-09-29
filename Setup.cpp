@@ -19,6 +19,7 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	ifstream infile;
 	infile.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
 	hostParamters.saveDatails=false;
+	hostParamters.maxTimeSteps=INT_MAX;
 	try {
 		infile.open(filename, std::ifstream::in);
 		infile.exceptions ( std::ifstream::badbit );
@@ -146,6 +147,8 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			infile >> hostParamters.offSetupdate;
 		} else if(keyword == "SAVEDETAILS") {
 			infile >> hostParamters.saveDatails;
+		} else if(keyword == "MAXTIMESTEPS") {
+			infile >> hostParamters.maxTimeSteps;
 		} else {
 			cerr << "Keyword " << keyword << " is unknown" << endl;
 			exit(EXIT_FAILURE);

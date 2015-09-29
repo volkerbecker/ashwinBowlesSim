@@ -39,6 +39,7 @@ typedef struct HostParameters {
 	float tappingAmplitudeY;
 	int tappingCheck;
 	int offSetupdate;
+	int maxTimeSteps;
 	bool saveDatails;
 } HostParameters;
 

@@ -11,6 +11,7 @@
 #include "Paramters.h"
 #include <fstream>
 #include <vector>
+#include <cmath>
 
 #define OPENCL_PROGRAM_NAME "asbkernels.cl"
 
@@ -129,7 +130,7 @@ void AshwinBowlesSystem::initializeOpenCL() {
 		context = cl::Context(devices);
 
 		// create a command queue
-		queue = cl::CommandQueue(context, devices[1]);
+		queue = cl::CommandQueue(context, devices[0]);
 	} catch (cl::Error &error) {
 		std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
 		exit(EXIT_FAILURE);
@@ -180,6 +181,7 @@ bool AshwinBowlesSystem::isJammed(
 	}
 	return isJammed;
 }
+
 
 void AshwinBowlesSystem::saveState(const string &filename,const int &timeStep,const int &number) {
 	ofstream saveFile(filename);

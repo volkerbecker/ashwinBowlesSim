@@ -112,6 +112,8 @@ public:
 			particles->setVelocity(amplitude);
 	}
 
+	void cpuTimestep();
+
 	void saveState(const string &filename,const int &timeStep,const int &number);
 
 

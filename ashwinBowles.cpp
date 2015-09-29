@@ -6,7 +6,7 @@
 // Description : Hello World in C, Ansi-style
 //============================================================================
 // ios::exceptions
-//#define USE_VISUALIZER
+#include "compilerSwitch.h"
 #ifdef USE_VISUALIZER
 #include "Visualizer.h"
 #endif
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 	vector<bool> state;
 	int exitedBonds;
 
-	while(tapNumber < hostParameters.numberOfTaps) {
+	while(tapNumber < hostParameters.numberOfTaps && i < hostParameters.maxTimeSteps) {
 		simulation.enqueueTimeStep();
 		//check tapping criteroin
 
@@ -141,7 +141,8 @@ int main(int argc, char *argv[]) {
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
 			char fname[25];
 			sprintf(fname,"%s.snap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
-			simulation.saveState(fname,i,tapNumber);
+			if(hostParameters.saveDatails)
+				simulation.saveState(fname,i,tapNumber);
 		}
 		if(i%hostParameters.offSetupdate==0) {
 			simulation.enqueOffestupdate();
