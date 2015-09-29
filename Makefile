@@ -12,6 +12,8 @@ OBJS =	ashwinBowles.o ParticleSystem.o Walls.o	AshwinBowlesSystem.o Setup.o
 LIBS =	-lOpenCL -L${AMDAPPSDKROOT}/lib/x86_64 -L${HOME}/workspace/openGLvisualizer -lminglvisualizer -lsfml-system -lsfml-window -lGLEW -lSOIL -lGL -lsfml-graphics -lX11 -pthread
 #For Meitner
 #LIBS =	-lOpenCL -L${AMDAPPSDKROOT}/lib/x86_64 -L${HOME}/workspace/openGLvisualizer -lminglvisualizer -lsfml-system -lsfml-window -lGLEW -lSOIL -lGL -lsfml-graphics -lX11 -pthread
+#for fermi
+LIBS =	-lOpenCL
 
 TARGET = ashwinBowles
 
