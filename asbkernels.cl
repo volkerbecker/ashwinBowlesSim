@@ -72,7 +72,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 
 	//caclulate accelaration due to the nearest right neighbor
 	//if ((id + 1) < paras->numberOfParticles) {
-		acc = ((id + 1) < paras->numberOfParticles) ?
+		acc += ((id + 1) < paras->numberOfParticles) ?
 				calcAcceleration(&posOffset[id], &posOffset[id + 1],
 				&position[id], &position[id + 1], &velocity[id],
 				&velocity[id + 1], paras) : 0;
@@ -91,7 +91,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 		float overlapp = paras->radius - (paras->upperWall - position[id].y);
 		float force = overlapp>0 ?
 					fmax( paras->springConstant * overlapp
-						- paras->damping * velocity[id].x, 0) : 0;
+						+ paras->damping * velocity[id].y, 0) : 0;
 		acc.y -= force * paras->inverseMass;
 	}
 //	//unten

@@ -40,6 +40,9 @@ typedef struct HostParameters {
 	int tappingCheck;
 	int offSetupdate;
 	int maxTimeSteps;
+	bool useOPENCL;
+	int targetPlatform;
+	int targetDevice;
 	bool saveDatails;
 } HostParameters;
 

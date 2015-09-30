@@ -44,47 +44,12 @@ public:
 
 	/// update the offset free postion data
 	void updateOffsetFreeData(const int columnlength=100) {
-		queue.enqueueNDRangeKernel(updateOffsetsKernel,cl::NullRange,globalp,localp);
 		particles->updateOffsetfreePositions(columnlength);
 	}
 
-	//returns the kinetic and the potential Energy of the system
-	void getEnergy(double &Ekin, double &Epot) {
-		//calculate kinetic Energy
-		Ekin = 0;
-		Epot = 0;
-		for (int i = 0; i < particles->size(); ++i) {
-			double velsq = (particles->getVelocities()[i].s[0])*(particles->getVelocities()[i].s[0])+
-					(particles->getVelocities()[i].s[1])*(particles->getVelocities()[i].s[1]);
-			Ekin += velsq * 0.5 * particles->mass();
-			double posx1 = particles->getPosition(i).s[0];
-			double posy1 = particles->getPosition(i).s[1];
-			if (i < particles->size() - 1) {
-				double posx2 = particles->getPosition(i + 1).s[0];
-				double posy2 = particles->getPosition(i + 1).s[1];
-				double overlapp = 2 * particles->radius()
-						- sqrt(
-								(posx1 - posx2) * (posx1 - posx2)
-								+ (posy1 - posy2) * (posy1 - posy2));
-				if (overlapp > 0) {
-					Epot += parameter.springConstant * overlapp * overlapp*0.5;
-				}
-			}
-			double wallOverlapp=particles->radius()-fabs(posy1-parameter.upperWall);
-			Epot+= wallOverlapp >0 ? wallOverlapp*wallOverlapp*parameter.springConstant*0.5 : 0;
-			wallOverlapp=particles->radius()-fabs(posy1-parameter.lowerWall);
-			Epot+= wallOverlapp >0 ? wallOverlapp*wallOverlapp*parameter.springConstant*0.5 : 0;
-			if(i==0) {
-				wallOverlapp=particles->radius()-fabs(posx1-parameter.leftWall-parameter.leftWallofset);
-				Epot+= wallOverlapp >0 ? wallOverlapp*wallOverlapp*parameter.springConstant*0.5 : 0;
-			}
-			if(i==particles->size()-1) {
-				wallOverlapp=particles->radius()-fabs(posx1-parameter.rightWall-parameter.rightWallOffset);
-				Epot+= wallOverlapp >0 ? wallOverlapp*wallOverlapp*parameter.springConstant*0.5 : 0;
-			}
+	///returns the kinetic and the potential Energy of the system
+	void getEnergy(double &Ekin, double &Epot);
 
-		}
-	}
 
 	/// test wther the particle system is jammed and returns
 		/// the number of exited Bonds and the state vector
@@ -113,6 +78,7 @@ public:
 	}
 
 	void cpuTimestep();
+	void updateOffsetCpu();
 
 	void saveState(const string &filename,const int &timeStep,const int &number);
 
@@ -146,7 +112,7 @@ protected:
 	Parameters parameter;
 
 private:
-	void initializeOpenCL();
+	void initializeOpenCL(const HostParameters &hostParameters);
 	cl::Program loadCLSource(const char *, const cl::Context &);
 	void setup(const Parameters& parameters, const HostParameters &hostParameters);
 

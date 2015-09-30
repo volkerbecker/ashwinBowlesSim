@@ -70,12 +70,13 @@ int main(int argc, char *argv[]) {
 	int exitedBonds;
 
 	while(tapNumber < hostParameters.numberOfTaps && i < hostParameters.maxTimeSteps) {
-		simulation.enqueueTimeStep();
+		if(hostParameters.useOPENCL) simulation.enqueueTimeStep();
+		else simulation.cpuTimestep();
 		//check tapping criteroin
 
 		if (i % hostParameters.tappingCheck == 0) {
 			double Ekin, Epot; //kinetic an potential energy
-			simulation.upDateHostMemory();
+			if(hostParameters.useOPENCL) simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin, Epot);
 
 			if (Ekin < hostParameters.tapThreshold) {
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
 						<< exitedBonds << "\t" << simulation.volume() << endl;
 				++tapNumber;
 
-				char fname[128];
+				char fname[128]; //todo use c++ not c here
 				sprintf(fname, "%s.tap.%05d.pdat",
 						(const char*) hostParameters.baseName.c_str(),
 						tapNumber);
@@ -129,6 +130,12 @@ int main(int argc, char *argv[]) {
 #ifdef USE_VISUALIZER
 		//do visualization
 		if(i%hostParameters.visualizerIntervall==0 && hostParameters.visualization) {
+			if(hostParameters.useOPENCL) {
+				simulation.enqueOffestupdate();
+				simulation.upDateHostMemory();
+			} else {
+				simulation.updateOffsetCpu();
+			}
 			simulation.updateOffsetFreeData(hostParameters.vLineSize);
 			visualizer->updateimage();
 		}
@@ -136,19 +143,20 @@ int main(int argc, char *argv[]) {
 		if(i%hostParameters.snapshotIntervall==0) {
 			//todo save system state
 			double Ekin,Epot; //kinetic an potential energy
-			simulation.upDateHostMemory();
+			if(hostParameters.useOPENCL)simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin,Epot);
 			cout << "step: " << i << "Ekin " << Ekin << " Epot " << Epot << " Gesamt: " << Ekin+Epot << endl;
-			char fname[25];
+			char fname[125];
 			sprintf(fname,"%s.snap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
 			if(hostParameters.saveDatails)
 				simulation.saveState(fname,i,tapNumber);
 		}
 		if(i%hostParameters.offSetupdate==0) {
-			simulation.enqueOffestupdate();
+			if(hostParameters.useOPENCL) simulation.enqueOffestupdate();
+			else simulation.updateOffsetCpu();
 		}
 		++i;
-	}
+}
 #ifdef USE_VISUALIZER
 	if(hostParameters.visualization) visualizer->close();
 	if(visualizer != nullptr) delete visualizer;

@@ -144,7 +144,7 @@ void ParticleSystem::getParticleDataFromDevice() {
 }
 
 void ParticleSystem::updateOffsetfreePositions(const int &columnlength) {
-	getParticleDataFromDevice();
+	//getParticleDataFromDevice();
 	for(int i=0;i<size();++i) {
 		cl_double2 tmp=getPosition(i,columnlength);
 		offsetfreepositions[i].s[0]=(float)tmp.s[0];

@@ -20,6 +20,9 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	infile.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
 	hostParamters.saveDatails=false;
 	hostParamters.maxTimeSteps=INT_MAX;
+	hostParamters.useOPENCL=true;
+	hostParamters.targetDevice=0;
+	hostParamters.targetPlatform=0;
 	try {
 		infile.open(filename, std::ifstream::in);
 		infile.exceptions ( std::ifstream::badbit );
@@ -47,7 +50,12 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 		HostParameters &hostParamters, Parameters &khParamters) {
 	infile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
-		if (keyword == "PNUMBER") {
+		if (keyword == "USEOPENCL") {
+			infile >> hostParamters.useOPENCL;
+		} else if (keyword== "CLTARGET") {
+			infile >> hostParamters.targetPlatform;
+			infile >> hostParamters.targetDevice;
+		} else if (keyword == "PNUMBER") {
 			infile >> khParamters.numberOfParticles;
 		} else if (keyword == "PMASS") {
 			infile >> khParamters.mass;
