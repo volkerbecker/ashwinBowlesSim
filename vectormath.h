@@ -54,65 +54,72 @@ inline cl_float2 calcAcceleration(
 		return (cl_float2){0,0};
 }
 
-cl_float2 operator +=(cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator +=(cl_float2 &v1,const cl_float2 &v2) {
 	v1.s[0]+=v2.s[0];
 	v1.s[1]+=v2.s[1];
 	return v1;
 }
 
-cl_float2 operator +(const cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator +(const cl_float2 &v1,const cl_float2 &v2) {
 	cl_float2 tmp=v1;
 	tmp+=v2;
 	return tmp;
 }
 
-cl_float2 operator -=(cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator -=(cl_float2 &v1,const cl_float2 &v2) {
 	v1.s[0]-=v2.s[0];
 	v1.s[1]-=v2.s[1];
 	return v1;
 }
 
-cl_float2 operator -(const cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator -(const cl_float2 &v1,const cl_float2 &v2) {
 	cl_float2 tmp=v1;
-	tmp+=v2;
+	tmp-=v2;
 	return tmp;
 }
 
-cl_float2 operator *=(cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator *=(cl_float2 &v1,const cl_float2 &v2) {
 	v1.s[0]*=v2.s[0];
 	v1.s[1]*=v2.s[1];
 	return v1;
 }
 
-cl_float2 operator *(const cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator *(const cl_float2 &v1,const cl_float2 &v2) {
 	cl_float2 tmp=v1;
-	tmp+=v2;
+	tmp*=v2;
 	return tmp;
 }
 
-cl_float2 operator /=(cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator /=(cl_float2 &v1,const cl_float2 &v2) {
 	v1.s[0]/=v2.s[0];
 	v1.s[1]/=v2.s[1];
 	return v1;
 }
 
-cl_float2 operator /(const cl_float2 &v1,const cl_float2 &v2) {
+inline cl_float2 operator /(const cl_float2 &v1,const cl_float2 &v2) {
 	cl_float2 tmp=v1;
-	tmp+=v2;
+	tmp/=v2;
 	return tmp;
 }
 
 
-cl_float2 operator *(const cl_float &v1,const cl_float2 &v2) {
+inline cl_float2 operator *(const cl_float &v1,const cl_float2 &v2) {
 	cl_float2 tmp;
 	tmp.s[0]=v1*v2.s[0];
 	tmp.s[1]=v1*v2.s[1];
 	return tmp;
 }
 
-cl_float2 operator *(const cl_float2 &v1,const cl_float &v2) {
+inline cl_float2 operator *(const cl_float2 &v1,const cl_float &v2) {
 	cl_float2 tmp;
 	return v2*v1;
+}
+
+inline cl_float2 operator /(const cl_float2 &v1,const cl_float &v2) {
+	cl_float2 tmp;
+	tmp.s[0]=v1.s[0]/v2;
+	tmp.s[1]=v1.s[1]/v2;
+	return tmp;
 }
 
 
