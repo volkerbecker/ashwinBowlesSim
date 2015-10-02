@@ -133,7 +133,7 @@ void AshwinBowlesSystem::initializeOpenCL(const HostParameters &hostParameters) 
 		cout << "\tDevice " << hostParameters.targetDevice << " was chosen." << endl;
 
 		// create a context
-		context = cl::Context(devices[hostParameters.targetDevice]);
+		context = cl::Context(devices);
 
 		// create a command queue
 		queue = cl::CommandQueue(context, devices[hostParameters.targetDevice]);
