@@ -14,7 +14,7 @@
 #include <cmath>
 #include "vectormath.h"
 
-#define OPENCL_PROGRAM_NAME "asbkernels.cl"
+//#define OPENCL_PROGRAM_NAME "asbkernels.cl"
 
 AshwinBowlesSystem::AshwinBowlesSystem() {
 	asbTime=0;
@@ -39,12 +39,11 @@ void AshwinBowlesSystem::setup(const Parameters& parameters,
 		const HostParameters & hostParameters) {
 	this->parameter = parameters;
 
+
 	//Create the openCl Stuff
 	initializeOpenCL(hostParameters);
 	//initialize particel System
 	particles = new ParticleSystem(context, queue, parameters,hostParameters);
-	particles->createDensestState(parameters.upperWall - parameters.lowerWall,
-			parameters.rightWall + parameters.rightWallOffset);
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
 	globalp = cl::NDRange(parameter.numberOfParticles);

@@ -210,7 +210,6 @@ void ParticleSystem::loadParticleState(const HostParameters & hostparameters) {
 
 
 ostream& operator <<(ostream& os, ParticleSystem & ps) {
-	ps.getParticleDataFromDevice();
 	for (int i = 0; i < ps.size(); i++) {
 		os << (double) ps.getPosition(i).s[0] << "\t"
 				<< (double) ps.getPosition(i).s[1] << "\t"

@@ -82,6 +82,15 @@ public:
 
 	void saveState(const string &filename,const int &timeStep,const int &number);
 
+	void getParticle(const int &i,float* pdat) {
+		pdat[0]=particles->getPositions()[i].s[0]+particles->getOffset()[i];
+		pdat[1]=particles->getPositions()[i].s[1];
+		pdat[2]=particles->getVelocities()[i].s[0];
+		pdat[3]=particles->getVelocities()[i].s[1];
+		pdat[4]=particles->getAccelerations()[i].s[0];
+		pdat[5]=particles->getAccelerations()[i].s[1];
+	}
+
 
 protected:
 	std::vector<cl::Platform> plattforms;

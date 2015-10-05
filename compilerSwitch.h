@@ -8,7 +8,7 @@
 #ifndef COMPILERSWITCH_H_
 #define COMPILERSWITCH_H_
 
-//#define USE_VISUALIZER
+#define USE_VISUALIZER
 
 
 
