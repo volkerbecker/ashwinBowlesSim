@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
 	//For testing todo remove if no longer needed
 
 #ifdef TESTRUN
-	ofstream trajectory("traj.dat");
+	ofstream trajectory("traj0.dat");
+	ofstream trajectory1("traj1.dat");
 #endif
 
 	Parameters kernelHostParameters;
@@ -157,13 +158,21 @@ int main(int argc, char *argv[]) {
 			if(hostParameters.saveDatails)
 				simulation.saveState(fname,i,tapNumber);
 #ifdef TESTRUN
-				float part[6];
-				simulation.getParticle(0,part);
-				trajectory << i*kernelHostParameters.timestep << " ";
-				for(int i=0;i<6;++i) {
-					trajectory << part[i] << " ";
-				}
+			float part[6];
+			simulation.getParticle(0, part);
+			trajectory << (i+1) * kernelHostParameters.timestep << " ";
+			for (int i = 0; i < 6; ++i) {
+				trajectory << part[i] << " ";
+			}
+			if (kernelHostParameters.numberOfParticles > 1) {
 				trajectory << endl;
+				simulation.getParticle(1, part);
+				trajectory1 << (i+1) * kernelHostParameters.timestep << " ";
+				for (int i = 0; i < 6; ++i) {
+					trajectory1 << part[i] << " ";
+				}
+				trajectory1 << endl;
+			}
 #endif
 		}
 		if(i%hostParameters.offSetupdate==0) {

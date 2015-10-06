@@ -51,6 +51,7 @@ __kernel void verletStep1(__global float2 *position, __global float2 *velocity,
 	int id = get_global_id(0);
 	velocity[id] += 0.5f * acceleration[id] * paras->timestep;
 	position[id] += velocity[id] * paras->timestep;
+	velocity[id] += 0.5f * acceleration[id] * paras->timestep;
 }
 
 
@@ -131,7 +132,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 		acc.x += paras->stampAcceleration;
 	}
 		acc-=paras->viskosity*velocity[id]*paras->inverseMass;
-		velocity[id] += 0.5f * paras->timestep * acc;
+		velocity[id] += 0.5f * paras->timestep * (acc-acceleration[id]);
 		acceleration[id] = acc;
 	if(id==0) *time +=paras->timestep;
 }

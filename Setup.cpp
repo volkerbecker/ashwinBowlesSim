@@ -10,6 +10,7 @@
 #include "fstream"
 #include <string>
 #include <climits>
+#include <cmath>
 
 using namespace std;
 
@@ -41,8 +42,9 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	} catch (ifstream::failure &e) {
 		cerr << "Error during read configuration file \n" << e.what() << endl;
 	}
-	khParameters.damping=khParameters.damping*khParameters.springConstant;
-	khParameters.stampAcceleration*=khParameters.inverseMass;
+	khParameters.damping = 2 * khParameters.damping
+			* sqrt(khParameters.springConstant * khParameters.mass);
+	khParameters.stampAcceleration *= khParameters.inverseMass;
 }
 
 void evaluateKeyWord(ifstream &infile ///< stream with parameter file

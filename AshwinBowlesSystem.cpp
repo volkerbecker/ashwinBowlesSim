@@ -259,6 +259,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 	for (int id = 0; id < particles->size(); ++id) {
 		velocity[id] += 0.5f * acceleration[id] * paras->timestep;
 		position[id] += velocity[id] * paras->timestep;
+		velocity[id] += 0.5f * acceleration[id] * paras->timestep;
 	}
 
 
@@ -316,7 +317,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 								fmax(
 										paras->springConstant * overlapp
 												- paras->damping * velocity[id].s[0],
-										0) :
+										-0) :
 								fmin(
 										paras->springConstant * overlapp
 												- paras->damping * velocity[id].s[0],
@@ -328,7 +329,9 @@ void AshwinBowlesSystem::cpuTimestep() {
 			acc.s[0] += paras->stampAcceleration;
 		}
 			acc-=paras->viskosity*velocity[id]*paras->inverseMass;
-			velocity[id] += 0.5f * paras->timestep * acc;
+
+
+			velocity[id] += 0.5f * paras->timestep * (acc-acceleration[id]);
 			acceleration[id] = acc;
 		if(id==0) asbTime +=paras->timestep;
 	}
