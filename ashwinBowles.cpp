@@ -25,7 +25,10 @@
 int main(int argc, char *argv[]) {
 
 	//For testing todo remove if no longer needed
+
+#ifdef TESTRUN
 	ofstream trajectory("traj.dat");
+#endif
 
 	Parameters kernelHostParameters;
 	HostParameters hostParameters;
@@ -141,7 +144,6 @@ int main(int argc, char *argv[]) {
 			}
 			simulation.updateOffsetFreeData(hostParameters.vLineSize);
 			visualizer->updateimage();
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 #endif
 		if(i%hostParameters.snapshotIntervall==0) {
@@ -154,6 +156,7 @@ int main(int argc, char *argv[]) {
 			sprintf(fname,"%s.snap.%05d.pdat",(const char*)hostParameters.baseName.c_str(),tapNumber);
 			if(hostParameters.saveDatails)
 				simulation.saveState(fname,i,tapNumber);
+#ifdef TESTRUN
 				float part[6];
 				simulation.getParticle(0,part);
 				trajectory << i*kernelHostParameters.timestep << " ";
@@ -161,6 +164,7 @@ int main(int argc, char *argv[]) {
 					trajectory << part[i] << " ";
 				}
 				trajectory << endl;
+#endif
 		}
 		if(i%hostParameters.offSetupdate==0) {
 			if(hostParameters.useOPENCL) simulation.enqueOffestupdate();
