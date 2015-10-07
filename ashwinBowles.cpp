@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 
 			if (Ekin < hostParameters.tapThreshold) {
 				if (simulation.isJammed(exitedBonds, state)) {
-					cout << "state is jammed, exited bonds: " << exitedBonds;
+					cout << "step: "<< i << " state is jammed, exited bonds: " << exitedBonds;
 				} else {
 					cout << "state is not jammed";
 				}

@@ -9,7 +9,7 @@
 #define COMPILERSWITCH_H_
 
 #define USE_VISUALIZER
-#define TESTRUN
+//#define TESTRUN
 
 
 
