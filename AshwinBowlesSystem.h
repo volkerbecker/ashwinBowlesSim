@@ -13,6 +13,8 @@
 #include "Walls.h"
 #include "Paramters.h"
 #include <cmath>
+#include <signal.h>
+
 
 class AshwinBowlesSystem {
 public:
@@ -90,6 +92,8 @@ public:
 		pdat[4]=particles->getAccelerations()[i].s[0];
 		pdat[5]=particles->getAccelerations()[i].s[1];
 	}
+
+
 
 
 protected:

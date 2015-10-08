@@ -21,11 +21,21 @@
 #include <thread>
 #include <fstream>
 #include "Setup.h"
+#include <signal.h>
+
+bool emergencystop=false;
+
+void
+termination_handler (int signum)
+{
+	cout << "sigint received " << endl;
+	emergencystop=true;
+}
 
 int main(int argc, char *argv[]) {
 
 	//For testing todo remove if no longer needed
-
+	signal(SIGINT, termination_handler);
 #ifdef TESTRUN
 	ofstream trajectory("traj0.dat");
 	ofstream trajectory1("traj1.dat");
@@ -73,13 +83,19 @@ int main(int argc, char *argv[]) {
 	double time;
 	int tapNumber=hostParameters.startSnapNumber; // counter which counts the performed taps
 	int i=hostParameters.startTimeStep; //number of the timestep
+
 	vector<bool> state;
 	int exitedBonds;
 
 	while(tapNumber < hostParameters.numberOfTaps && i < hostParameters.maxTimeSteps) {
 		if(hostParameters.useOPENCL) simulation.enqueueTimeStep();
 		else simulation.cpuTimestep();
-		//check tapping criteroin
+		if(emergencystop) {
+			if(hostParameters.useOPENCL) simulation.upDateHostMemory();
+			simulation.saveState(hostParameters.baseName+".emerg.state",i,tapNumber);
+			cout << "State file saved, program terminates now" << endl;
+			exit(EXIT_SUCCESS);
+		}
 
 		if (i % hostParameters.tappingCheck == 0) {
 			double Ekin, Epot; //kinetic an potential energy
