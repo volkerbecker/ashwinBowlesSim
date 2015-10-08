@@ -69,18 +69,19 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 		__global float2 *acceleration,__global float *time,__constant struct Parameters* paras,
 		const int start) {
 	int id = get_global_id(0);
+	int sysid = id%paras->numberOfParticles;
 	float2 acc = 0;
 
 	//caclulate accelaration due to the nearest right neighbor
 	//if ((id + 1) < paras->numberOfParticles) {
-		acc += ((id + 1) < paras->numberOfParticles) ?
+		acc += ((sysid + 1) < paras->numberOfParticles) ?
 				calcAcceleration(&posOffset[id], &posOffset[id + 1],
 				&position[id], &position[id + 1], &velocity[id],
 				&velocity[id + 1], paras) : 0;
 	//}
 	//calculate acceleration due to the nearest left neighbor
 	//if ((id) > 0) {
-		acc += ((id) > 0) ?
+		acc += ((sysid) > 0) ?
 				calcAcceleration(&posOffset[id], &posOffset[id - 1],
 				&position[id], &position[id - 1], &velocity[id],
 				&velocity[id - 1], paras) : 0;
@@ -104,11 +105,11 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 			acc.y += force * paras->inverseMass;
 	}
 	//calculate wall forces
-	if (id == 0 || id == (paras->numberOfParticles - 1)) {
-		int i = (id == 0 ? 0 : 1);
+	if (sysid == 0 || sysid == (paras->numberOfParticles - 1)) {
+		int i = (sysid == 0 ? 0 : 1);
 		int wallOffset = (
-				id == 0 ? paras->leftWallofset : paras->rightWallOffset);
-		float verticalWall = (id == 0 ? paras->leftWall : paras->rightWall);
+				sysid == 0 ? paras->leftWallofset : paras->rightWallOffset);
+		float verticalWall = (sysid == 0 ? paras->leftWall : paras->rightWall);
 		float overlapp = (float) (posOffset[id] - wallOffset)
 				+ (position[id].x - verticalWall);
 		if (fabs(overlapp) < paras->radius) {
@@ -128,7 +129,7 @@ __kernel void calculateAccelarationOnestep(__global int *posOffset,
 			acc.x += force * paras->inverseMass;
 		}
 	}
-	if (id == 0) {
+	if (sysid == 0) {
 		acc.x += paras->stampAcceleration;
 	}
 		acc-=paras->viskosity*velocity[id]*paras->inverseMass;

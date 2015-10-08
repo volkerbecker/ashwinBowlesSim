@@ -265,19 +265,20 @@ void AshwinBowlesSystem::cpuTimestep() {
 
 
 	for (int id = 0; id < particles->size(); ++id) {
+		int sysid = id % paras->numberOfParticles;
 		cl_float2 acc;
 		acc.s[0]=0;
 		acc.s[1]=0;
 		//caclulate accelaration due to the nearest right neighbor
 		//if ((id + 1) < paras->numberOfParticles) {
-			acc += ((id + 1) < paras->numberOfParticles) ?
+			acc += ((sysid + 1) < paras->numberOfParticles) ?
 					calcAcceleration(&posOffset[id], &posOffset[id + 1],
 					&position[id], &position[id + 1], &velocity[id],
 					&velocity[id + 1], paras) : (cl_float2){0,0};
 		//}
 		//calculate acceleration due to the nearest left neighbor
 		//if ((id) > 0) {
-			acc += ((id) > 0) ?
+			acc += ((sysid) > 0) ?
 					calcAcceleration(&posOffset[id], &posOffset[id - 1],
 					&position[id], &position[id - 1], &velocity[id],
 					&velocity[id - 1], paras) : (cl_float2){0,0};
@@ -301,10 +302,10 @@ void AshwinBowlesSystem::cpuTimestep() {
 				acc.s[1] += force * paras->inverseMass;
 		}
 		//calculate wall forces
-		if (id == 0 || id == (paras->numberOfParticles - 1)) {
-			int i = (id == 0 ? 0 : 1);
+		if (sysid == 0 || sysid == (paras->numberOfParticles - 1)) {
+			int i = (sysid == 0 ? 0 : 1);
 			int wallOffset = (
-					id == 0 ? paras->leftWallofset : paras->rightWallOffset);
+					sysid == 0 ? paras->leftWallofset : paras->rightWallOffset);
 			float verticalWall = (id == 0 ? paras->leftWall : paras->rightWall);
 			float overlapp = (float) (posOffset[id] - wallOffset)
 					+ (position[id].s[0] - verticalWall);
@@ -325,7 +326,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 				acc.s[0] += force * paras->inverseMass;
 			}
 		}
-		if (id == 0) {
+		if (sysid == 0) {
 			acc.s[0] += paras->stampAcceleration;
 		}
 			acc-=paras->viskosity*velocity[id]*paras->inverseMass;

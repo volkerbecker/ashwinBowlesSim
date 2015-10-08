@@ -24,6 +24,7 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	hostParamters.useOPENCL=true;
 	hostParamters.targetDevice=0;
 	hostParamters.targetPlatform=0;
+	khParameters.number_of_systems=1;
 	try {
 		infile.open(filename, std::ifstream::in);
 		infile.exceptions ( std::ifstream::badbit );
@@ -75,8 +76,9 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			infile >> khParamters.damping;
 		} else if (keyword == "VISKOSITY") {
 			infile >> khParamters.viskosity;
-		}
-		else if (keyword == "SYSTEMSIZE") {
+		} else if (keyword == "NUMSYS"){
+			infile >> khParamters.number_of_systems;
+		} else if (keyword == "SYSTEMSIZE") {
 			double width, hight;
 			infile >> width;
 			infile >> hight;
