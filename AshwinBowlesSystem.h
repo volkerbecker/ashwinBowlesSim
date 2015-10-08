@@ -58,7 +58,7 @@ public:
 		/// 1 is an exited bond, 0 is an relaxed bond
 		/// \returns true if the state fullfills the jamming condtion
 	bool isJammed(
-			int &exitedBonds, ///< \return number of exited bonds
+			int exitedBonds[], ///< \return number of exited bonds
 			std::vector<bool> &stateVector ///< \return the state vector
 	);
 

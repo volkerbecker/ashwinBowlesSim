@@ -32,6 +32,12 @@ public:
 	/// get the system size
 	const unsigned int &size() const {return _size;}
 
+	/// get or set the number systems
+	unsigned int & number_of_systems() {return _number_of_systems;}
+
+	/// get the number of systems
+	const unsigned int &number_of_systems() const {return _number_of_systems;}
+
 	/// acces to radius
 	float & radius() {return _radius;}
 	/// acces to radius
@@ -77,12 +83,14 @@ public:
 	///< get the position of the i'th particle
 	cl_double2 getPosition(
 			int number, ///< return the position of the i'th particle
-			int columnlength=INT_MAX) {
+			int columnlength=INT_MAX,
+			int sysOffset=0) {
 		cl_double2 tmp;
 		int tmpoffsetx=offset[number]%columnlength;
 		double tmpoffsety=(offset[number]/columnlength)*4*radius();
 		tmp.s[0]=tmpoffsetx+position[number].s[0];
 		tmp.s[1]=(double)position[number].s[1]-tmpoffsety;
+		tmp.s[1]-=((int)rightborder%columnlength+1)*4*radius()*sysOffset;
 		return tmp;
 	}
 
@@ -120,8 +128,10 @@ public:
 
 protected:
 	unsigned int _size; ///< number of particles
+	unsigned int _number_of_systems;
 	float _radius;
 	float _mass;
+	double rightborder;
 	vector<cl_int> offset; ///< offset for the particle x-positions
 	vector<cl_float2> position; ///< particles' x position relative to the offset
 	vector<cl_float2> velocity; ///< particles velocities

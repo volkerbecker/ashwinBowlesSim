@@ -46,7 +46,7 @@ void AshwinBowlesSystem::setup(const Parameters& parameters,
 	particles = new ParticleSystem(context, queue, parameters,hostParameters);
 	//compile the opencl program
 	cl::Program program = loadCLSource(OPENCL_PROGRAM_NAME, context);
-	globalp = cl::NDRange(parameter.numberOfParticles);
+	globalp = cl::NDRange(parameter.numberOfParticles*parameter.number_of_systems);
 	localp = cl::NullRange; //todo optmiale wgsize finden
 	//globalAcc=cl::NDRange((int) parameter.numberOfParticles / 2);
 	try {
@@ -155,31 +155,37 @@ void AshwinBowlesSystem::enqueueTimeStep() {
 }
 
 bool AshwinBowlesSystem::isJammed(
-			int &exitedBonds, ///< \return number of exited bonds
+			int exitedBonds[], ///< \return number of exited bonds
 			std::vector<bool> &stateVector ///< \return the state vector
 	) {
 	stateVector.clear();
-	stateVector.resize(particles->size());
-	exitedBonds=0;
+
+
 	bool isJammed=true;
 	const vector<cl_float2> & pos = particles->getPositions();
-	for(int i=1;i<pos.size();++i) {
-		const double &y1=pos[i].s[1];
-		const double &y2=pos[i-1].s[1];
-		if( parameter.upperWall-y1 > parameter.radius*(1+0.01)
-				&& y1-parameter.lowerWall > parameter.radius*(1+0.01)) {
-			isJammed=false;
-			break;
-		}
-		if(fabs(y2-y1)>0.05*parameter.radius) {
-			stateVector[i-1]=false;
-		} else {
-			stateVector[i-1]=true;
-			exitedBonds++;
-			if(i>1) {
-				if(stateVector[i-2]) {
-					isJammed=false;
-					break;
+	stateVector.resize(pos.size());
+	for (int sysnum = 0; sysnum < particles->number_of_systems(); ++sysnum) {
+		exitedBonds[sysnum]=0;
+		for (int i = 1 + sysnum * particles->size();
+				i < (particles->size() + sysnum * particles->size()); ++i) {
+			const double &y1 = pos[i].s[1];
+			const double &y2 = pos[i - 1].s[1];
+			if (parameter.upperWall - y1 > parameter.radius * (1 + 0.01)
+					&& y1 - parameter.lowerWall
+							> parameter.radius * (1 + 0.01)) {
+				isJammed = false;
+				break;
+			}
+			if (fabs(y2 - y1) > 0.05 * parameter.radius) {
+				stateVector[i - 1] = false;
+			} else {
+				stateVector[i - 1] = true;
+				exitedBonds[sysnum]++;
+				if (i > 1) {
+					if (stateVector[i - 2]) {
+						isJammed = false;
+						break;
+					}
 				}
 			}
 		}
@@ -256,7 +262,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 	vector<cl_float2> &acceleration = particles->getAccelerations();
 	Parameters *paras = &(this->parameter);
 
-	for (int id = 0; id < particles->size(); ++id) {
+	for (int id = 0; id < position.size(); ++id) {
 		velocity[id] += 0.5f * acceleration[id] * paras->timestep;
 		position[id] += velocity[id] * paras->timestep;
 		velocity[id] += 0.5f * acceleration[id] * paras->timestep;
@@ -264,7 +270,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 
 
 
-	for (int id = 0; id < particles->size(); ++id) {
+	for (int id = 0; id < position.size(); ++id) {
 		int sysid = id % paras->numberOfParticles;
 		cl_float2 acc;
 		acc.s[0]=0;
@@ -341,7 +347,7 @@ void AshwinBowlesSystem::cpuTimestep() {
 void AshwinBowlesSystem::updateOffsetCpu() {
 	vector<cl_int> &posOffsets = particles->getOffset();
 	vector<cl_float2> &positions = particles->getPositions();
-	for (int id = 0; id < particles->size(); ++id) {
+	for (int id = 0; id < posOffsets.size(); ++id) {
 		int truncPos = (int) positions[id].s[0];
 		posOffsets[id] += truncPos;
 		positions[id].s[0] -= truncPos;

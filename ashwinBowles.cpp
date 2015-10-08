@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 		simulation.updateOffsetFreeData(hostParameters.vLineSize);
 		visualizer->initializeSystem(
 				simulation.getPrtToOffsetFreePositions(),
-				kernelHostParameters.numberOfParticles,
+				kernelHostParameters.numberOfParticles*kernelHostParameters.number_of_systems,
 				kernelHostParameters.radius,
 				hostParameters.vLineSize,hostParameters.vLineSize,0,-hostParameters.vLineSize+kernelHostParameters.diameter,10);
 				visualizer->updateimage();
@@ -84,8 +84,7 @@ int main(int argc, char *argv[]) {
 	int tapNumber=hostParameters.startSnapNumber; // counter which counts the performed taps
 	int i=hostParameters.startTimeStep; //number of the timestep
 
-	vector<bool> state;
-	int exitedBonds;
+
 
 	while(tapNumber < hostParameters.numberOfTaps && i < hostParameters.maxTimeSteps) {
 		if(hostParameters.useOPENCL) simulation.enqueueTimeStep();
@@ -101,18 +100,22 @@ int main(int argc, char *argv[]) {
 			double Ekin, Epot; //kinetic an potential energy
 			if(hostParameters.useOPENCL) simulation.upDateHostMemory();
 			simulation.getEnergy(Ekin, Epot);
-
 			if (Ekin < hostParameters.tapThreshold) {
+				vector<bool> state;
+				int exitedBonds[kernelHostParameters.number_of_systems];
 				if (simulation.isJammed(exitedBonds, state)) {
-					cout << "step: "<< i << " state is jammed, exited bonds: " << exitedBonds;
+					cout << "step: "<< i << " state is jammed: ";
 				} else {
 					cout << "state is not jammed";
 				}
-				cout << ", volume " << simulation.volume() << endl;
-				//todo save tap data
-				tappSave.precision(20);
-				tappSave << tapNumber << "\t" << Epot << "\t" << Ekin << "\t"
-						<< exitedBonds << "\t" << simulation.volume() << endl;
+				tappSave << tapNumber << "\t";
+				for (auto ebonds : exitedBonds) {
+					tappSave.precision(20);
+					tappSave << ebonds << "\t";
+					cout << ebonds << " ";
+				}
+				tappSave << endl;
+				cout << endl;
 				++tapNumber;
 
 				char fname[128]; //todo use c++ not c here

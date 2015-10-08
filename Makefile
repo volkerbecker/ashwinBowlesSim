@@ -9,8 +9,8 @@ CLFLAGS = -DCL_USE_DEPRECATED_OPENCL_2_0_APIS -D__CL_ENABLE_EXCEPTIONS -DCL_ENAB
 CLFLAGS += -DOPENCL_PROGRAM_NAME=\"${KERNELFILE}\" 
 
 #optimization
-CLFLAGS += -O3
-#CLFLAGS += -O0 -g
+#CLFLAGS += -O3
+CLFLAGS += -O0 -g
 
 ifneq (${HOST},fermi)
 INCLUDE =-I${HOME}/workspace/openGLvisualizer 
