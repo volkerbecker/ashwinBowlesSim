@@ -71,11 +71,11 @@ public:
 	}
 
 
-	void velocityPulse(const cl_float2 &amplitude) {
+	void velocityPulse(const vector<cl_float2> &amplitude) {
 		particles->setRandomVelocity(amplitude);
 	}
 
-	void hammerPulse(const cl_float2 &amplitude) {
+	void hammerPulse(const vector<cl_float2> &amplitude) {
 			particles->setVelocity(amplitude);
 	}
 

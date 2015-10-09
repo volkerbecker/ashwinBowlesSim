@@ -102,6 +102,11 @@ inline cl_float2 operator /(const cl_float2 &v1,const cl_float2 &v2) {
 	return tmp;
 }
 
+inline cl_float2 operator *=(cl_float2 &v1,const cl_float &v2) {
+	v1.s[0]*=v2;
+	v1.s[1]*=v2;
+	return v1;
+}
 
 inline cl_float2 operator *(const cl_float &v1,const cl_float2 &v2) {
 	cl_float2 tmp;

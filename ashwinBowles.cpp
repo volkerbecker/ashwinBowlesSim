@@ -22,6 +22,7 @@
 #include <fstream>
 #include "Setup.h"
 #include <signal.h>
+#include "vectormath.h"
 
 bool emergencystop=false;
 
@@ -133,19 +134,13 @@ int main(int argc, char *argv[]) {
 				//do the next excitation
 				switch (hostParameters.tappingType) {
 				case RDELTA:
-					simulation.velocityPulse(
-							(cl_float2 ) {
-											hostParameters.tappingAmplitudeX,
-											hostParameters.tappingAmplitudeY });
+					simulation.velocityPulse(hostParameters.tappingAmplitude);
 					break;
 
 				case HAMMER:
-					simulation.hammerPulse(
-							(cl_float2 ) {
-											hostParameters.tappingAmplitudeX,
-											hostParameters.tappingAmplitudeY });
-					hostParameters.tappingAmplitudeX *= -1;
-					hostParameters.tappingAmplitudeY *= -1;
+					simulation.hammerPulse(hostParameters.tappingAmplitude);
+					for(auto ta: hostParameters.tappingAmplitude)
+						ta*=-1.0f;
 					break;
 				default:
 					break;

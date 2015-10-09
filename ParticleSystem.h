@@ -116,9 +116,9 @@ public:
 				const double & wallDistance, ///< the distance of the vertical walls
 				const double & rightWall); ///< the right wall
 
-	void setRandomVelocity(const cl_float2 &Amplitude);
+	void setRandomVelocity(const vector<cl_float2> &Amplitude);
 
-	void setVelocity(const cl_float2 &Amplitude);
+	void setVelocity(const vector<cl_float2> &Amplitude);
 
 
 	///ostream operator

@@ -6,6 +6,7 @@
 
 #ifndef __OPENCL_VERSION__
 #include <CL/cl.hpp>
+#include <vector>
 #include <string>
 
 typedef enum {
@@ -35,8 +36,7 @@ typedef struct HostParameters {
 	asbEnum tapCriteroin;
 	asbEnum tappingType;
 	double tapThreshold;
-	float tappingAmplitudeX;
-	float tappingAmplitudeY;
+	std::vector<cl_float2> tappingAmplitude;
 	int tappingCheck;
 	int offSetupdate;
 	int maxTimeSteps;

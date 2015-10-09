@@ -101,17 +101,26 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 		} else if (keyword == "TAPTYPE") {
 			infile >> keyword;
 			if (keyword == "RDELTA") {
-				hostParamters.tappingType=RDELTA;
+				hostParamters.tappingType = RDELTA;
 				infile >> khParamters.stampAcceleration;
-				infile >> hostParamters.tappingAmplitudeX;
-				infile >> hostParamters.tappingAmplitudeY;
-			} else if(keyword == "HAMMER") {
-				hostParamters.tappingType=HAMMER;
-				infile >> khParamters.stampAcceleration;
-				infile >> hostParamters.tappingAmplitudeX;
-				infile >> hostParamters.tappingAmplitudeY;
-			}
-			else {
+				hostParamters.tappingAmplitude.resize(
+						khParamters.number_of_systems);
+				for (int i = 0; i < hostParamters.tappingAmplitude.size();
+						++i) {
+					infile >> hostParamters.tappingAmplitude[i].s[0];
+					infile >> hostParamters.tappingAmplitude[i].s[1];
+				}
+			} else if (keyword == "HAMMER") {
+				hostParamters.tappingType = RDELTA;
+								infile >> khParamters.stampAcceleration;
+				hostParamters.tappingAmplitude.resize(
+						khParamters.number_of_systems);
+				for (int i = 0; i < hostParamters.tappingAmplitude.size();
+						++i) {
+					infile >> hostParamters.tappingAmplitude[i].s[0];
+					infile >> hostParamters.tappingAmplitude[i].s[1];
+				}
+			} else {
 				cout << "tapping protocol " << keyword << "not supported \n";
 				exit(EXIT_FAILURE);
 			}

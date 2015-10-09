@@ -162,32 +162,33 @@ void ParticleSystem::updateOffsetfreePositions(const int &columnlength) {
 	for (int sysnum = 0; sysnum < number_of_systems(); sysnum++) {
 		for (int i = 0; i < size(); ++i) {
 			int index=sysnum*size()+i;
-			cl_double2 tmp = getPosition(i, columnlength,sysnum);
+			cl_double2 tmp = getPosition(index, columnlength,sysnum);
 			offsetfreepositions[index].s[0] = (float) tmp.s[0];
 			offsetfreepositions[index].s[1] = (float) tmp.s[1];
 		}
 	}
 }
 
-void ParticleSystem::setRandomVelocity(const cl_float2 &Amplitude) {
+void ParticleSystem::setRandomVelocity(const vector<cl_float2> &Amplitude) {
 	for (int sysnum = 0; sysnum < number_of_systems(); sysnum++) {
 		for (uint i = 0; i < size(); ++i) {
 			int index=sysnum*size()+i;
-			velocity[index].s[0] = Amplitude.s[0] * (drand48() * 2 - 1);
-			velocity[index].s[1] = Amplitude.s[1] * (drand48() * 2 - 1);
+			velocity[index].s[0] = Amplitude[sysnum].s[0] * (drand48() * 2 - 1);
+			velocity[index].s[1] = Amplitude[sysnum].s[1] * (drand48() * 2 - 1);
 		}
 		queue.enqueueWriteBuffer(velocityBuffer, CL_FALSE, 0,
 				velocity.size() * sizeof(cl_float2), velocity.data());
 		;
 	}
+	//exit(0);
 }
 
-void ParticleSystem::setVelocity(const cl_float2 &Amplitude) {
+void ParticleSystem::setVelocity(const vector<cl_float2> &Amplitude) {
 	for (int sysnum = 0; sysnum < number_of_systems(); sysnum++) {
 		for (uint i = 0; i < size(); ++i) {
 			int index = sysnum * size() + i;
-			velocity[index].s[0] = Amplitude.s[0];
-			velocity[index].s[1] = Amplitude.s[1];
+			velocity[index].s[0] = Amplitude[sysnum].s[0];
+			velocity[index].s[1] = Amplitude[sysnum].s[1];
 		}
 	}
 	queue.enqueueWriteBuffer(velocityBuffer, CL_FALSE, 0,
