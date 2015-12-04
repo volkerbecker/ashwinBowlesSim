@@ -129,24 +129,25 @@ int main(int argc, char *argv[]) {
 					for (int ii = 0; ii < state.size(); ++ii) {
 						stateSave << state[ii];
 					}
+
+					//do the next excitation
+					switch (hostParameters.tappingType) {
+					case RDELTA:
+						simulation.velocityPulse(hostParameters.tappingAmplitude);
+						break;
+
+					case HAMMER:
+						simulation.hammerPulse(hostParameters.tappingAmplitude);
+						for(auto ta: hostParameters.tappingAmplitude)
+							ta*=-1.0f;
+						break;
+					default:
+						break;
+					}
+					stateSave << endl;
 				} else {
 					cout << "state is not jammed";
 				}
-				//do the next excitation
-				switch (hostParameters.tappingType) {
-				case RDELTA:
-					simulation.velocityPulse(hostParameters.tappingAmplitude);
-					break;
-
-				case HAMMER:
-					simulation.hammerPulse(hostParameters.tappingAmplitude);
-					for(auto ta: hostParameters.tappingAmplitude)
-						ta*=-1.0f;
-					break;
-				default:
-					break;
-				}
-				stateSave << endl;
 			}
 		}
 #ifdef USE_VISUALIZER
