@@ -24,6 +24,7 @@ void parseConfigurationFile(const string &filename,HostParameters &hostParamters
 	hostParamters.useOPENCL=true;
 	hostParamters.targetDevice=0;
 	hostParamters.targetPlatform=0;
+	hostParamters.makeMovie=false;
 	khParameters.number_of_systems=1;
 	try {
 		infile.open(filename, std::ifstream::in);
@@ -135,8 +136,6 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			infile >> hostParamters.edges;
 		} else if (keyword == "VINTERVAL") {
 			infile >> hostParamters.visualizerIntervall;
-		} else if (keyword == "BITMAPSAVE") {
-			infile >> hostParamters.savesBitmaps;
 		} else if (keyword == "BASENAME") {
 			infile >> hostParamters.baseName;
 		} else if (keyword == "SNAP") {
@@ -170,7 +169,15 @@ void evaluateKeyWord(ifstream &infile ///< stream with parameter file
 			infile >> hostParamters.saveDatails;
 		} else if(keyword == "MAXTIMESTEPS") {
 			infile >> hostParamters.maxTimeSteps;
-		} else {
+		} else if(keyword == "MAKEMOVIE") {
+			int value;
+			infile >> value;
+			if(value==1) hostParamters.makeMovie=true; else
+				if(value==0) hostParamters.makeMovie=false; else {
+					cerr << "invalied value for MAKEMOVIE" << endl;
+					exit(EXIT_FAILURE);
+				}
+		}else {
 			cerr << "Keyword " << keyword << " is unknown" << endl;
 			exit(EXIT_FAILURE);
 		}

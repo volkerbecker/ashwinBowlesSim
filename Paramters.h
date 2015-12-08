@@ -44,6 +44,7 @@ typedef struct HostParameters {
 	int targetPlatform;
 	int targetDevice;
 	bool saveDatails;
+	bool makeMovie;
 } HostParameters;
 
 #else

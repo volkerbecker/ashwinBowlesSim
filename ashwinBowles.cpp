@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	Visualizer *visualizer=nullptr;
 #endif
 
-
+	int frameNumber=0;
 
 	//read the paramter file
 	parseConfigurationFile(argv[1],hostParameters,kernelHostParameters);
@@ -159,6 +159,11 @@ int main(int argc, char *argv[]) {
 			}
 			simulation.updateOffsetFreeData(hostParameters.vLineSize);
 			visualizer->updateimage();
+			if(hostParameters.makeMovie) {
+				char fname[125];
+				sprintf(fname,"%s.frame%04d.png",(const char*)hostParameters.baseName.c_str(),frameNumber++);
+				visualizer->snapshot(fname);
+			}
 		}
 #endif
 		if(i%hostParameters.snapshotIntervall==0) {
