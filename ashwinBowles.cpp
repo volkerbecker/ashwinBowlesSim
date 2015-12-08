@@ -106,46 +106,48 @@ int main(int argc, char *argv[]) {
 				int exitedBonds[kernelHostParameters.number_of_systems];
 				if (simulation.isJammed(exitedBonds, state)) {
 					cout << "step: "<< i << " state is jammed: ";
+
+					tappSave << tapNumber << "\t";
+					for (auto ebonds : exitedBonds) {
+						tappSave.precision(20);
+						tappSave << ebonds << "\t";
+						cout << ebonds << " ";
+					}
+					tappSave << endl;
+					cout << endl;
+					++tapNumber;
+
+					char fname[128]; //todo use c++ not c here
+					sprintf(fname, "%s.tap.%05d.pdat",
+							(const char*) hostParameters.baseName.c_str(),
+							tapNumber);
+					if(hostParameters.saveDatails)
+						simulation.saveState(fname, i, tapNumber);
+					sprintf(fname, "%s.tap.%05d.state",
+							(const char*) hostParameters.baseName.c_str(),
+							tapNumber);
+					for (int ii = 0; ii < state.size(); ++ii) {
+						stateSave << state[ii];
+					}
+
+					//do the next excitation
+					switch (hostParameters.tappingType) {
+					case RDELTA:
+						simulation.velocityPulse(hostParameters.tappingAmplitude);
+						break;
+
+					case HAMMER:
+						simulation.hammerPulse(hostParameters.tappingAmplitude);
+						for(auto ta: hostParameters.tappingAmplitude)
+							ta*=-1.0f;
+						break;
+					default:
+						break;
+					}
+					stateSave << endl;
 				} else {
 					cout << "state is not jammed";
 				}
-				tappSave << tapNumber << "\t";
-				for (auto ebonds : exitedBonds) {
-					tappSave.precision(20);
-					tappSave << ebonds << "\t";
-					cout << ebonds << " ";
-				}
-				tappSave << endl;
-				cout << endl;
-				++tapNumber;
-
-				char fname[128]; //todo use c++ not c here
-				sprintf(fname, "%s.tap.%05d.pdat",
-						(const char*) hostParameters.baseName.c_str(),
-						tapNumber);
-				if(hostParameters.saveDatails)
-					simulation.saveState(fname, i, tapNumber);
-				sprintf(fname, "%s.tap.%05d.state",
-						(const char*) hostParameters.baseName.c_str(),
-						tapNumber);
-				for (int ii = 0; ii < state.size(); ++ii) {
-					stateSave << state[ii];
-				}
-				//do the next excitation
-				switch (hostParameters.tappingType) {
-				case RDELTA:
-					simulation.velocityPulse(hostParameters.tappingAmplitude);
-					break;
-
-				case HAMMER:
-					simulation.hammerPulse(hostParameters.tappingAmplitude);
-					for(auto ta: hostParameters.tappingAmplitude)
-						ta*=-1.0f;
-					break;
-				default:
-					break;
-				}
-				stateSave << endl;
 			}
 		}
 #ifdef USE_VISUALIZER
