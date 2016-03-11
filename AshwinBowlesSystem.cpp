@@ -174,6 +174,8 @@ bool AshwinBowlesSystem::isJammed(
 					&& y1 - parameter.lowerWall
 							> parameter.radius * (1 + 0.01)) {
 				isJammed = false;
+				cout << "Particle " << i << " of system "
+						<< sysnum << " has no contact to the wall" << endl;
 				break;
 			}
 			if (fabs(y2 - y1) > 0.05 * parameter.radius) {
@@ -184,6 +186,8 @@ bool AshwinBowlesSystem::isJammed(
 				if (i > 1) {
 					if (stateVector[i - 2]) {
 						isJammed = false;
+						cout << "Particle " << i << " of system "
+					         << sysnum << " do not fullfill the jamming condition." << endl;
 						break;
 					}
 				}
@@ -207,7 +211,7 @@ void AshwinBowlesSystem::getEnergy(double &Ekin, double &Epot) {
 		//calculate kinetic Energy
 		Ekin = 0;
 		Epot = 0;
-		for (int i = 0; i < particles->size(); ++i) {
+		for (int i = 0; i < particles->size()*particles->number_of_systems(); ++i) {
 			double velsq = (particles->getVelocities()[i].s[0])*(particles->getVelocities()[i].s[0])+
 					(particles->getVelocities()[i].s[1])*(particles->getVelocities()[i].s[1]);
 			Ekin += velsq * 0.5 * particles->mass();

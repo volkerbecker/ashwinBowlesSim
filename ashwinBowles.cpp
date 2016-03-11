@@ -23,6 +23,7 @@
 #include "Setup.h"
 #include <signal.h>
 #include "vectormath.h"
+#include <limits>
 
 bool emergencystop=false;
 
@@ -34,7 +35,6 @@ termination_handler (int signum)
 }
 
 int main(int argc, char *argv[]) {
-
 	//For testing todo remove if no longer needed
 	signal(SIGINT, termination_handler);
 #ifdef TESTRUN
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 				vector<bool> state;
 				int exitedBonds[kernelHostParameters.number_of_systems];
 				if (simulation.isJammed(exitedBonds, state)) {
-					cout << "step: "<< i << " state is jammed: ";
+					cout << "step: "<< i << " state is jammed (Ekin " << Ekin << "): ";
 
 					tappSave << tapNumber << "\t";
 					for (auto ebonds : exitedBonds) {
@@ -200,7 +200,11 @@ int main(int argc, char *argv[]) {
 			if(hostParameters.useOPENCL) simulation.enqueOffestupdate();
 			else simulation.updateOffsetCpu();
 		}
-		++i;
+		if( (i+1) == std::numeric_limits<int>::max() ) {
+			cout << "Warning: time step counter exceeds numeric limits, reset to zero" << endl;
+		} else {
+			++i;
+		}
 }
 #ifdef USE_VISUALIZER
 	if(hostParameters.visualization) visualizer->close();
