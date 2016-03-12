@@ -202,6 +202,7 @@ int main(int argc, char *argv[]) {
 		}
 		if( (i+1) == std::numeric_limits<int>::max() ) {
 			cout << "Warning: time step counter exceeds numeric limits, reset to zero" << endl;
+			i=0;
 		} else {
 			++i;
 		}
